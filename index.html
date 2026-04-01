@@ -25,6 +25,7 @@
   --red:      #f87171;
   --font: 'Plus Jakarta Sans', sans-serif;
 }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
@@ -36,7 +37,7 @@ body {
   padding-bottom: 100px;
 }
 
-/* --------------- TOPBAR --------------- */
+/* ── TOPBAR ── */
 .topbar {
   position: sticky; top: 0; z-index: 50;
   background: rgba(13,13,15,.85);
@@ -57,7 +58,7 @@ body {
 .topbar-title { font-size: .95rem; font-weight: 700; color: var(--text); }
 #dateDisplay { font-size: .75rem; font-weight: 500; color: var(--text3); letter-spacing: .4px; }
 
-/* --------------- MAIN --------------- */
+/* ── MAIN ── */
 .main { padding: 28px 20px; max-width: 1440px; margin: 0 auto; }
 
 .grid {
@@ -67,7 +68,7 @@ body {
   align-items: start;
 }
 
-/* --------------- COLUMN --------------- */
+/* ── COLUMN ── */
 .col {
   background: var(--s1);
   border: 1px solid var(--border);
@@ -104,10 +105,7 @@ body {
 .prog-track { height: 3px; background: var(--s3); border-radius: 99px; overflow: hidden; }
 .prog-bar   { height: 100%; border-radius: 99px; opacity: .65; transition: width .7s cubic-bezier(.4,0,.2,1); }
 
-/* Sparkline */
-.sparkline { width: 100%; height: 24px; margin-top: 6px; }
-
-/* --------------- TASK LIST --------------- */
+/* ── TASK LIST ── */
 .task-list { list-style: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
 
 .task-card {
@@ -169,21 +167,14 @@ body {
 }
 .sub-prog-fill { height: 100%; transition: width .4s ease; }
 
-/* --------------- EMPTY --------------- */
+/* ── EMPTY ── */
 .empty {
   text-align: center; padding: 30px 16px;
   color: var(--text3); font-size: .8rem;
 }
 .empty-icon { font-size: 1.6rem; margin-bottom: 6px; opacity: .35; }
 
-/* --------------- STREAK --------------- */
-.streak {
-  text-align: center; margin: 0 0 14px;
-  font-size: .75rem; font-weight: 600; color: var(--green);
-}
-.streak-number { font-size: 1.1rem; font-weight: 800; }
-
-/* --------------- FAB --------------- */
+/* ── FAB ── */
 .fab {
   position: fixed; bottom: 28px; right: 28px;
   width: 54px; height: 54px;
@@ -197,7 +188,7 @@ body {
 .fab:hover { transform: scale(1.06) translateY(-2px); box-shadow: 0 14px 36px rgba(124,106,247,.45); }
 .fab:active { transform: scale(.96); }
 
-/* --------------- OVERLAY --------------- */
+/* ── OVERLAY ── */
 .overlay {
   position: fixed; inset: 0;
   background: rgba(5,5,8,.82);
@@ -300,7 +291,7 @@ select option { background: #1a1a1d; }
 
 .hidden { display: none !important; }
 
-/* --------------- BRAVO --------------- */
+/* ── BRAVO ── */
 #bravo {
   position: fixed; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -325,18 +316,361 @@ select option { background: #1a1a1d; }
   font-size: .88rem; font-weight: 600; letter-spacing: 5px;
   text-transform: uppercase; color: rgba(255,255,255,.22); margin-top: 10px;
 }
+</style>
+</head>
+<body>
 
-/* --------------- KEYBOARD FOCUS --------------- */
-.task-card.keyboard-focused {
-  outline: 2px solid var(--violet);
-  outline-offset: 2px;
+<div id="bravo">
+  <div class="bravo-word">BRAVO</div>
+  <div class="bravo-sub">Objectif accompli</div>
+</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo">P</div>
+    <span class="topbar-title">Performance Elite</span>
+  </div>
+  <span id="dateDisplay"></span>
+</header>
+
+<main class="main">
+  <div class="grid" id="grid"></div>
+</main>
+
+<button class="fab" onclick="openModal()" title="Nouvel objectif">
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>
+</button>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Nouvel objectif</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <input type="hidden" id="editId">
+
+    <div class="form-group">
+      <label class="form-label">Nom de l'objectif</label>
+      <input type="text" id="fName" placeholder="Ex: Méditer 10 minutes…" oninput="syncForm()">
+    </div>
+
+    <div class="form-group hidden" id="grpScope">
+      <label class="form-label">Portée</label>
+      <select id="fScope" onchange="syncForm()">
+        <option value="today">Journalier</option>
+        <option value="week">Semaine</option>
+        <option value="month">Mois</option>
+        <option value="year">Année</option>
+      </select>
+      <div id="grpDate" class="hidden" style="margin-top:10px;">
+        <label class="form-label">Date précise (optionnel)</label>
+        <input type="date" id="fDate">
+      </div>
+    </div>
+
+    <div class="form-group hidden" id="grpDeps">
+      <label class="form-label">Dépendances</label>
+      <label class="toggle-row">
+        <input type="checkbox" id="fHasDeps" onchange="syncForm()">
+        <span>Ajouter des objectifs parents</span>
+      </label>
+      <div id="parentListWrap" class="hidden">
+        <div class="parent-list" id="parentList"></div>
+      </div>
+    </div>
+
+    <div class="form-group hidden" id="grpRecur">
+      <label class="form-label">Récurrence</label>
+      <select id="fRecur" onchange="syncForm()">
+        <option value="">Unique</option>
+        <option value="Quotidien">Quotidien</option>
+        <option value="Hebdomadaire">Hebdomadaire</option>
+        <option value="Mensuel">Mensuel</option>
+      </select>
+      <div id="grpDays" class="hidden">
+        <div class="days-row" id="daysRow">
+          <div class="day-btn" data-d="1">L</div>
+          <div class="day-btn" data-d="2">M</div>
+          <div class="day-btn" data-d="3">Me</div>
+          <div class="day-btn" data-d="4">J</div>
+          <div class="day-btn" data-d="5">V</div>
+          <div class="day-btn" data-d="6">S</div>
+          <div class="day-btn" data-d="0">D</div>
+        </div>
+      </div>
+      <div id="grpMonthDay" class="hidden" style="margin-top:10px;">
+        <label class="form-label">Jour du mois (1–31)</label>
+        <input type="number" id="fMonthDay" min="1" max="31" value="1">
+      </div>
+    </div>
+
+    <div class="hidden" id="grpSubmitBtn" style="margin-top:4px;">
+      <button class="btn-save" onclick="saveTask()">Enregistrer</button>
+    </div>
+    <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+  </div>
+</div>
+
+<script>
+let tasks  = JSON.parse(localStorage.getItem('v28_tasks'))  || [];
+let counts = JSON.parse(localStorage.getItem('v28_counts')) || {};
+let selDays = [];
+
+const COLS = [
+  { id: 'today', label: "Aujourd'hui" },
+  { id: 'week',  label: 'Cette semaine' },
+  { id: 'month', label: 'Ce mois' },
+  { id: 'year',  label: 'Cette année' },
+];
+
+const COL_COLOR = { today: '#7c6af7', week: '#5b9cf6', month: '#34d399', year: '#fbbf24' };
+
+function save() {
+  localStorage.setItem('v28_tasks',  JSON.stringify(tasks));
+  localStorage.setItem('v28_counts', JSON.stringify(counts));
 }
 
-/* --------------- SECURITY / BACKUP / SHARE --------------- */
-.backup-info {
-  font-size: .65rem; color: var(--text3); margin-left: auto; margin-right: 12px;
+function timeLeft(s) {
+  const n = new Date();
+  if (s === 'today') return `${23 - n.getHours()}h ${59 - n.getMinutes()}m restantes`;
+  if (s === 'week')  return `${7 - (n.getDay() || 7)} jours restants`;
+  if (s === 'month') return `${new Date(n.getFullYear(), n.getMonth()+1, 0).getDate() - n.getDate()} jours restants`;
+  return `${11 - n.getMonth()} mois restants`;
 }
-.export-btn, .share-btn, .import-btn {
-  margin-left: 8px;
-  padding: 6px 10px;
-  background
+
+function taskVisible(t, id, now, tod, ws, we) {
+  if (t.scope !== id) return false;
+  if (!t.date && !t.recurrence) return true;
+  if (t.date) {
+    const d = new Date(t.date);
+    if (id === 'today') return t.date === tod;
+    if (id === 'week')  return d >= ws && d <= we;
+    if (id === 'month') return d.getMonth() === now.getMonth();
+    if (id === 'year')  return d.getFullYear() === now.getFullYear();
+  }
+  if (t.recurrence === 'Quotidien')    return true;
+  if (t.recurrence === 'Hebdomadaire') return t.recurDays.includes(now.getDay());
+  if (t.recurrence === 'Mensuel')      return now.getDate() == t.recurMonthDay;
+  return true;
+}
+
+function parentProgress(t) {
+  if (!t.requirements?.length) return 100;
+  const n = t.requirements.reduce((a,r) => a + r.quota, 0);
+  const g = t.requirements.reduce((a,r) => a + Math.min(counts[r.parentId]||0, r.quota), 0);
+  return n ? (g/n)*100 : 100;
+}
+
+function isLocked(t) {
+  return !t.completed && t.requirements?.some(r => (counts[r.parentId]||0) < r.quota);
+}
+
+function render() {
+  const now = new Date();
+  const tod = now.toISOString().split('T')[0];
+  const ws  = new Date(now); ws.setDate(now.getDate() - (now.getDay()===0 ? 6 : now.getDay()-1));
+  const we  = new Date(ws); we.setDate(ws.getDate()+6);
+
+  document.getElementById('dateDisplay').textContent =
+    now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  COLS.forEach(col => {
+    const c     = COL_COLOR[col.id];
+    const vis   = tasks.filter(t => taskVisible(t, col.id, now, tod, ws, we));
+    const done  = vis.filter(t => t.completed).length;
+    const total = vis.length;
+    const pct   = total ? Math.round(done/total*100) : 0;
+
+    // SVG ring
+    const R = 16, C = 2*Math.PI*R;
+    const offset = C - (pct/100)*C;
+
+    const items = total === 0
+      ? `<div class="empty"><div class="empty-icon">✦</div>Aucun objectif pour cette période</div>`
+      : vis.map(t => {
+          const prog   = parentProgress(t);
+          const locked = isLocked(t);
+          return `
+            <li class="task-card${t.completed?' done':''}${locked?' locked':''}">
+              <div class="task-top">
+                <span class="recur-pill">${t.recurrence||'Unique'}</span>
+                <button class="del-btn" onclick="deleteTask('${t.id}')" title="Supprimer">
+                  <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                    <path d="M1 1l7 7M8 1L1 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="task-body">
+                <div class="check" onclick="toggleTask('${t.id}')"></div>
+                <span class="task-text" onclick="openEditModal('${t.id}')">${t.text}</span>
+              </div>
+              ${t.requirements?.length ? `
+                <div class="sub-prog">
+                  <div class="sub-prog-fill" style="width:${prog}%;background:linear-gradient(90deg,${c},${c}99)"></div>
+                </div>` : ''}
+            </li>`;
+        }).join('');
+
+    grid.insertAdjacentHTML('beforeend', `
+      <div class="col">
+        <div class="col-header">
+          <div class="col-top">
+            <div class="col-label-wrap">
+              <span class="col-title">${col.label}</span>
+              <span class="time-left">${timeLeft(col.id)}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="ring-wrap">
+                <svg width="42" height="42" viewBox="0 0 42 42">
+                  <circle class="ring-bg" cx="21" cy="21" r="${R}"/>
+                  <circle class="ring-fill" cx="21" cy="21" r="${R}"
+                    stroke="${c}"
+                    stroke-dasharray="${C.toFixed(2)}"
+                    stroke-dashoffset="${offset.toFixed(2)}"/>
+                </svg>
+                <span class="ring-pct" style="color:${c}">${pct}%</span>
+              </div>
+              <span class="col-count">${done}/${total}</span>
+            </div>
+          </div>
+          <div class="prog-track">
+            <div class="prog-bar" style="width:${pct}%;background:${c}"></div>
+          </div>
+        </div>
+        <ul class="task-list">${items}</ul>
+      </div>`);
+  });
+
+  save();
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t => t.id===id);
+  if (!t) return;
+  if (isLocked(t)) return alert('Pré-requis insuffisants.');
+  t.completed = !t.completed;
+  counts[t.id] = (counts[t.id]||0) + (t.completed ? 1 : -1);
+  if (t.completed) celebrate();
+  render();
+}
+
+function celebrate() {
+  const el = document.getElementById('bravo');
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1900);
+  confetti({ particleCount:80, spread:90, origin:{y:.5}, colors:['#7c6af7','#5b9cf6','#34d399','#fbbf24','#fff'] });
+  setTimeout(() => {
+    confetti({ particleCount:45, angle:60,  spread:55, origin:{x:0,y:.65}, colors:['#7c6af7','#fbbf24'] });
+    confetti({ particleCount:45, angle:120, spread:55, origin:{x:1,y:.65}, colors:['#34d399','#5b9cf6'] });
+  }, 200);
+  setTimeout(() => confetti({ particleCount:28, spread:60, origin:{y:.4}, shapes:['star'], colors:['#fbbf24','#7c6af7'] }), 450);
+}
+
+function deleteTask(id) {
+  if (!confirm('Supprimer cet objectif ?')) return;
+  tasks = tasks.filter(t => t.id !== id);
+  render();
+}
+
+function openModal(data=null) {
+  document.getElementById('modalTitle').textContent = data ? "Modifier l'objectif" : 'Nouvel objectif';
+  document.getElementById('editId').value    = data?.id   || '';
+  document.getElementById('fName').value     = data?.text || '';
+  document.getElementById('fScope').value    = data?.scope || 'today';
+  document.getElementById('fDate').value     = data?.date  || '';
+  document.getElementById('fRecur').value    = data?.recurrence || '';
+  document.getElementById('fMonthDay').value = data?.recurMonthDay || 1;
+  document.getElementById('fHasDeps').checked = !!(data?.requirements?.length);
+  selDays = data?.recurDays ? [...data.recurDays] : [];
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.toggle('on', selDays.includes(+b.dataset.d)));
+  buildParentList(data?.requirements||[]);
+  syncForm();
+  document.getElementById('overlay').style.display = 'flex';
+}
+
+function openEditModal(id) { openModal(tasks.find(t => t.id===id)); }
+function closeModal()       { document.getElementById('overlay').style.display='none'; }
+
+function syncForm() {
+  const name   = document.getElementById('fName').value.trim();
+  const scope  = document.getElementById('fScope').value;
+  const recur  = document.getElementById('fRecur').value;
+  const deps   = document.getElementById('fHasDeps').checked;
+  const editId = document.getElementById('editId').value;
+  const others = tasks.filter(t => t.id !== editId);
+
+  toggle('grpScope',       name.length > 0);
+  toggle('grpDate',        name.length > 0 && scope === 'today');
+  toggle('grpDeps',        name.length > 0 && others.length > 0);
+  toggle('parentListWrap', deps);
+  toggle('grpRecur',       name.length > 0);
+  toggle('grpDays',        recur === 'Hebdomadaire');
+  toggle('grpMonthDay',    recur === 'Mensuel');
+  toggle('grpSubmitBtn',   name.length > 0);
+}
+
+function toggle(id, show) {
+  document.getElementById(id).classList.toggle('hidden', !show);
+}
+
+function buildParentList(existing=[]) {
+  const editId = document.getElementById('editId').value;
+  document.getElementById('parentList').innerHTML = tasks
+    .filter(t => t.id !== editId)
+    .map(t => {
+      const req = existing.find(r => r.parentId===t.id);
+      return `<div class="parent-row">
+        <input type="checkbox" class="pc" value="${t.id}" ${req?'checked':''}>
+        <span>${t.text}</span>
+        <input type="number" class="pq" value="${req?.quota||1}" min="1">
+      </div>`;
+    }).join('');
+}
+
+document.getElementById('daysRow').addEventListener('click', e => {
+  const btn = e.target.closest('.day-btn');
+  if (!btn) return;
+  const d = +btn.dataset.d;
+  btn.classList.toggle('on');
+  selDays = btn.classList.contains('on') ? [...selDays,d] : selDays.filter(x=>x!==d);
+});
+
+function saveTask() {
+  const id  = document.getElementById('editId').value;
+  const reqs = document.getElementById('fHasDeps').checked
+    ? Array.from(document.querySelectorAll('.parent-row'))
+        .filter(r => r.querySelector('.pc').checked)
+        .map(r => ({ parentId: r.querySelector('.pc').value, quota: +r.querySelector('.pq').value||1 }))
+    : [];
+
+  const t = {
+    id:            id || 'T-'+Date.now(),
+    text:          document.getElementById('fName').value.trim(),
+    scope:         document.getElementById('fScope').value,
+    date:          document.getElementById('fScope').value==='today' ? document.getElementById('fDate').value : '',
+    recurrence:    document.getElementById('fRecur').value,
+    recurDays:     [...selDays],
+    recurMonthDay: +document.getElementById('fMonthDay').value,
+    requirements:  reqs,
+    completed:     id ? (tasks.find(x=>x.id===id)?.completed||false) : false,
+  };
+
+  tasks = id ? tasks.map(x => x.id===id ? t : x) : [...tasks, t];
+  closeModal();
+  render();
+}
+
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeModal();
+});
+
+render();
+</script>
+</body>
+</html>
