@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Elite v23 - Restauration Parenté</title>
+    <title>Performance Elite v24 - Formulaire Intelligent</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -47,11 +47,11 @@
         input, select { width: 100%; background: #000; border: 1px solid #222; color: white; padding: 12px; border-radius: 10px; box-sizing: border-box; }
         
         .toggle-container { display: flex; align-items: center; gap: 10px; background: #000; padding: 12px; border-radius: 10px; border: 1px solid #222; cursor: pointer; margin-top: 10px;}
-        .toggle-container input { width: auto; margin-bottom: 0; cursor: pointer;}
+        .toggle-container input[type="checkbox"] { width: auto; margin-bottom: 0; cursor: pointer;}
 
         .parent-selector { background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; margin-top: 10px; }
         .parent-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
-        .parent-row input[type="number"] { width: 60px; padding: 5px; text-align: center; }
+        .parent-row input[type="number"] { width: 60px; padding: 5px; text-align: center; margin-bottom: 0; }
 
         .btn-add { background: var(--accent-red); color: white; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .fab { position: fixed; bottom: 40px; right: 40px; width: 64px; height: 64px; background: var(--accent-red); border-radius: 20px; border: none; color: white; font-size: 32px; cursor: pointer; z-index: 100; }
@@ -68,7 +68,7 @@
         
         <div class="form-step" id="step-name" style="display:block;">
             <label>Titre de l'objectif</label>
-            <input type="text" id="taskName" placeholder="Titre..." oninput="checkSteps()">
+            <input type="text" id="taskName" placeholder="Titre de la mission..." oninput="checkSteps()">
         </div>
 
         <div class="form-step" id="step-scope">
@@ -89,15 +89,17 @@
         <div class="form-step" id="step-dep-toggle">
             <label class="toggle-container">
                 <input type="checkbox" id="hasDeps" onchange="checkSteps()">
-                <span>Ajouter des liens de parenté ?</span>
+                <span>Activer des liens de parenté ?</span>
             </label>
-            <div class="parent-selector" id="parentList" style="display:none;"></div>
+            <div id="parentListWrapper" style="display:none;">
+                <div class="parent-selector" id="parentList"></div>
+            </div>
         </div>
 
         <div class="form-step" id="step-recur">
             <label>Récurrence automatique</label>
             <select id="taskRecur" onchange="checkSteps()">
-                <option value="">Unique</option>
+                <option value="">Unique (Mission)</option>
                 <option value="Quotidien">Quotidien</option>
                 <option value="Hebdomadaire">Hebdomadaire</option>
                 <option value="Mensuel">Mensuel</option>
@@ -106,20 +108,20 @@
         </div>
 
         <div class="form-step" id="step-submit">
-            <button class="btn-add" onclick="saveTask()">DÉPLOYER</button>
+            <button class="btn-add" onclick="saveTask()">DÉPLOYER L'OBJECTIF</button>
         </div>
 
         <button style="width:100%; background:none; border:none; color:#444; margin-top:15px; cursor:pointer;" onclick="closeModal()">Annuler</button>
     </div>
 </div>
 
-<h1 id="currentDateDisplay" style="font-size:0.9rem; color:#444; letter-spacing:2px; margin-bottom:5px;">CHARGE EN COURS...</h1>
+<h1 id="currentDateDisplay" style="font-size:0.9rem; color:#444; letter-spacing:2px; margin-bottom:5px; text-transform:uppercase;">...</h1>
 <div class="dashboard-grid" id="mainGrid"></div>
 <button class="fab" onclick="openCreateModal()">+</button>
 
 <script>
-    let allTasks = JSON.parse(localStorage.getItem('v23_tasks')) || [];
-    let totalCounts = JSON.parse(localStorage.getItem('v23_counts')) || {};
+    let allTasks = JSON.parse(localStorage.getItem('v24_tasks')) || [];
+    let totalCounts = JSON.parse(localStorage.getItem('v24_counts')) || {};
     const columns = [
         { id: 'today', label: "Journalier" },
         { id: 'week', label: "Semaine" },
@@ -133,25 +135,27 @@
         const hasDeps = document.getElementById('hasDeps').checked;
         const currentId = document.getElementById('editTaskId').value;
         
-        // Affichage séquentiel
-        document.getElementById('step-scope').style.display = name.length > 0 ? 'block' : 'none';
-        document.getElementById('dateWrapper').style.display = (scope === 'today' && name.length > 0) ? 'block' : 'none';
+        // 1. Gérer la portée et la date
+        const showScope = name.length > 0;
+        document.getElementById('step-scope').style.display = showScope ? 'block' : 'none';
+        document.getElementById('dateWrapper').style.display = (showScope && scope === 'today') ? 'block' : 'none';
 
-        if (name.length > 0) {
-            // On affiche le bouton de dépendance s'il existe d'autres tâches
-            const otherTasks = allTasks.filter(t => t.id !== currentId);
-            document.getElementById('step-dep-toggle').style.display = otherTasks.length > 0 ? 'block' : 'none';
+        if (showScope) {
+            // 2. Gérer le bouton de parenté (seulement si d'autres tâches existent)
+            const others = allTasks.filter(t => t.id !== currentId);
+            document.getElementById('step-dep-toggle').style.display = others.length > 0 ? 'block' : 'none';
             
-            // On affiche la liste SEULEMENT si la case est cochée
-            document.getElementById('parentList').style.display = hasDeps ? 'block' : 'none';
+            // 3. Masquer/Afficher la liste des parents selon la case à cocher
+            document.getElementById('parentListWrapper').style.display = hasDeps ? 'block' : 'none';
             
+            // 4. Suite du formulaire
             document.getElementById('step-recur').style.display = 'block';
             document.getElementById('step-submit').style.display = 'block';
         }
     }
 
     function openCreateModal() {
-        document.getElementById('modalTitle').innerText = "NOUVEL OBJECTIF";
+        document.getElementById('modalTitle').innerText = "NOUVEAU PLAN";
         document.getElementById('editTaskId').value = "";
         document.getElementById('taskName').value = "";
         document.getElementById('taskDate').value = "";
@@ -184,14 +188,14 @@
         const list = document.getElementById('parentList');
         list.innerHTML = '';
         const currentId = document.getElementById('editTaskId').value;
-        const others = allTasks.filter(t => t.id !== currentId);
+        const potentialParents = allTasks.filter(t => t.id !== currentId);
         
-        others.forEach(t => {
+        potentialParents.forEach(t => {
             const req = existingReqs.find(r => r.parentId === t.id);
             list.innerHTML += `
                 <div class="parent-row">
                     <input type="checkbox" class="parent-check" value="${t.id}" ${req ? 'checked' : ''}>
-                    <span style="flex-grow:1">${t.text}</span>
+                    <span style="flex-grow:1; font-size:0.8rem;">${t.text}</span>
                     <input type="number" class="parent-quota" value="${req ? req.quota : 1}" min="1">
                 </div>`;
         });
@@ -215,8 +219,6 @@
             }));
         }
 
-        if (!name) return;
-
         if (id) {
             let task = allTasks.find(t => t.id === id);
             Object.assign(task, { text: name, date, scope, recurrence: recur, requirements: reqs });
@@ -230,12 +232,12 @@
     function toggleTask(id) {
         const task = allTasks.find(t => t.id === id);
         if (task.requirements?.some(req => (totalCounts[req.parentId] || 0) < req.quota) && !task.completed) {
-            alert("Pré-requis insuffisants !"); return;
+            alert("Accès refusé : Pré-requis non atteints."); return;
         }
         task.completed = !task.completed;
         if(task.completed) {
             totalCounts[task.id] = (totalCounts[task.id] || 0) + 1;
-            confetti({ particleCount: 80, origin: { y: 0.8 } });
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         } else {
             totalCounts[task.id] = Math.max(0, (totalCounts[task.id] || 0) - 1);
         }
@@ -247,7 +249,7 @@
         grid.innerHTML = '';
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
-        document.getElementById('currentDateDisplay').innerText = now.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
+        document.getElementById('currentDateDisplay').innerText = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
@@ -256,7 +258,7 @@
         columns.forEach(col => {
             let filtered = allTasks.filter(t => {
                 if (t.scope !== col.id) return false;
-                if (!t.date) return true;
+                if (!t.date) return true; // Permanent
                 const tDate = new Date(t.date);
                 if (col.id === 'today') return t.date === todayStr;
                 if (col.id === 'week') return tDate >= startOfWeek && tDate <= endOfWeek;
@@ -273,7 +275,7 @@
                 listHtml += `
                     <li class="task-card ${tk.completed ? 'completed' : ''} ${isLocked && !tk.completed ? 'locked' : ''}">
                         <div style="display:flex; justify-content:space-between; align-items:center">
-                            <span class="badge" style="font-size:0.6rem; color:#555">${tk.recurrence || 'UNIQUE'}</span>
+                            <span class="badge" style="font-size:0.6rem; color:#555">${tk.recurrence || 'OBJECTIF UNIQUE'}</span>
                             <div style="display:flex; align-items:center; gap:8px">
                                 <span class="stat-badge">Σ ${totalCounts[tk.id]||0}</span>
                                 <button onclick="deleteTask('${tk.id}')" style="background:none; border:none; color:#333; cursor:pointer;">×</button>
@@ -299,11 +301,11 @@
                 </div>`;
         });
 
-        localStorage.setItem('v23_tasks', JSON.stringify(allTasks));
-        localStorage.setItem('v23_counts', JSON.stringify(totalCounts));
+        localStorage.setItem('v24_tasks', JSON.stringify(allTasks));
+        localStorage.setItem('v24_counts', JSON.stringify(totalCounts));
     }
 
-    function deleteTask(id) { if(confirm("Supprimer ?")) { allTasks = allTasks.filter(t => t.id !== id); updateUI(); } }
+    function deleteTask(id) { if(confirm("Supprimer l'objectif ?")) { allTasks = allTasks.filter(t => t.id !== id); updateUI(); } }
 
     updateUI();
 </script>
