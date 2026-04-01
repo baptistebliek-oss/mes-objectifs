@@ -9,20 +9,20 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
 :root {
-  --bg:        #0d0d0f;
-  --s1:        #141416;
-  --s2:        #1a1a1d;
-  --s3:        #202024;
-  --border:    rgba(255,255,255,0.07);
-  --border2:   rgba(255,255,255,0.04);
-  --text:      #f0f0f2;
-  --text2:     #8a8a96;
-  --text3:     #46464f;
-  --violet:    #7c6af7;
-  --blue:      #5b9cf6;
-  --green:     #34d399;
-  --amber:     #fbbf24;
-  --red:       #f87171;
+  --bg:       #0d0d0f;
+  --s1:       #141416;
+  --s2:       #1a1a1d;
+  --s3:       #202024;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.04);
+  --text:     #f0f0f2;
+  --text2:    #8a8a96;
+  --text3:    #46464f;
+  --violet:   #7c6af7;
+  --blue:     #5b9cf6;
+  --green:    #34d399;
+  --amber:    #fbbf24;
+  --red:      #f87171;
   --font: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -56,25 +56,7 @@ body {
   font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0;
 }
 .topbar-title { font-size: .95rem; font-weight: 700; color: var(--text); }
-
-.topbar-right { display: flex; align-items: center; gap: 20px; }
 #dateDisplay { font-size: .75rem; font-weight: 500; color: var(--text3); letter-spacing: .4px; }
-
-.btn-cal-toggle {
-  background: var(--s2);
-  border: 1px solid var(--border);
-  color: var(--text3);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-}
-.btn-cal-toggle:hover { color: var(--text2); border-color: var(--text3); }
 
 /* ── MAIN ── */
 .main { padding: 28px 20px; max-width: 1440px; margin: 0 auto; }
@@ -87,9 +69,22 @@ body {
 }
 
 /* ── COLUMN ── */
-.col { background: var(--s1); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
-.col-header { padding: 18px 18px 14px; border-bottom: 1px solid var(--border2); }
-.col-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.col {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.col-header {
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--border2);
+}
+.col-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
 .col-label-wrap { display: flex; flex-direction: column; gap: 3px; }
 .col-title { font-size: .95rem; font-weight: 700; color: var(--text); }
 .time-left { font-size: .68rem; font-weight: 500; color: var(--text3); }
@@ -98,80 +93,236 @@ body {
 .ring-wrap { position: relative; width: 42px; height: 42px; flex-shrink: 0; }
 .ring-wrap svg { transform: rotate(-90deg); display: block; }
 .ring-bg   { fill: none; stroke: var(--s3); stroke-width: 3.5; }
-.ring-fill { fill: none; stroke-width: 3.5; stroke-linecap: round; transition: stroke-dashoffset .7s cubic-bezier(.4,0,.2,1); }
-.ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 800; }
+.ring-fill { fill: none; stroke-width: 3.5; stroke-linecap: round;
+             transition: stroke-dashoffset .7s cubic-bezier(.4,0,.2,1); }
+.ring-pct {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .58rem; font-weight: 800;
+}
 .col-count { font-size: .68rem; font-weight: 600; color: var(--text3); margin-top: 2px; }
 
 .prog-track { height: 3px; background: var(--s3); border-radius: 99px; overflow: hidden; }
 .prog-bar   { height: 100%; border-radius: 99px; opacity: .65; transition: width .7s cubic-bezier(.4,0,.2,1); }
 
 /* ── TASK LIST ── */
-.task-list { list-style: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 50px; }
+.task-list { list-style: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
 
 .task-card {
   background: var(--s2);
   border: 1px solid var(--border2);
   border-radius: 14px;
   padding: 12px 13px;
-  transition: background .18s, border-color .18s, opacity .2s, transform .1s;
-  cursor: grab;
+  transition: background .18s, border-color .18s, opacity .2s, filter .2s;
 }
-.task-card.dragging { opacity: 0.4; transform: scale(0.98); }
 .task-card:hover { background: var(--s3); border-color: var(--border); }
 .task-card.locked { opacity: .25; filter: grayscale(1); pointer-events: none; }
 .task-card.done { background: rgba(52,211,153,.04); border-color: rgba(52,211,153,.13); }
 
-.task-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; pointer-events: none; }
-.recur-pill { font-size: .58rem; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--text3); background: var(--s3); padding: 2px 7px; border-radius: 99px; }
-.del-btn { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--text3); cursor: pointer; border-radius: 6px; pointer-events: auto; }
+.task-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 9px;
+}
+.recur-pill {
+  font-size: .58rem; font-weight: 700; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--text3);
+  background: var(--s3); padding: 2px 7px; border-radius: 99px;
+}
+.del-btn {
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; border-radius: 6px;
+  transition: background .15s, color .15s;
+}
 .del-btn:hover { background: rgba(248,113,113,.1); color: var(--red); }
 
 .task-body { display: flex; align-items: center; gap: 11px; }
-.check { width: 20px; height: 20px; border: 2px solid var(--s3); border-radius: 7px; flex-shrink: 0; cursor: pointer; position: relative; background: var(--s1); }
+
+.check {
+  width: 20px; height: 20px;
+  border: 2px solid var(--s3); border-radius: 7px; flex-shrink: 0;
+  cursor: pointer; position: relative; background: var(--s1);
+  transition: background .2s, border-color .2s, transform .12s;
+}
+.check:hover { border-color: var(--violet); transform: scale(1.1); }
 .task-card.done .check { background: var(--green); border-color: var(--green); }
-.task-card.done .check::after { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 5l3.5 3.5L11 1' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/11px no-repeat; }
-.task-text { font-size: .875rem; font-weight: 500; color: var(--text); flex: 1; }
+.task-card.done .check::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 5l3.5 3.5L11 1' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/11px no-repeat;
+}
+
+.task-text {
+  font-size: .875rem; font-weight: 500; line-height: 1.45;
+  color: var(--text); cursor: pointer; flex: 1;
+  transition: color .15s;
+}
+.task-text:hover { color: #fff; }
 .task-card.done .task-text { color: var(--text3); text-decoration: line-through; }
 
-/* ── CALENDAR MODAL ── */
-.cal-container { width: 100%; }
-.cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
-.cal-day-name { font-size: 0.65rem; font-weight: 700; color: var(--text3); text-transform: uppercase; padding-bottom: 5px; }
-.cal-cell {
-  aspect-ratio: 1;
-  background: var(--s2);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  position: relative;
+.sub-prog {
+  height: 2px; background: var(--s3);
+  border-radius: 99px; overflow: hidden; margin-top: 10px;
 }
-.cal-cell.today { border-color: var(--violet); color: var(--violet); }
-.cal-cell.empty { opacity: 0; pointer-events: none; }
-.cal-dots { display: flex; gap: 3px; margin-top: 4px; height: 4px; }
-.dot { width: 4px; height: 4px; border-radius: 50%; }
+.sub-prog-fill { height: 100%; transition: width .4s ease; }
 
-/* ── UI ELEMENTS ── */
-.fab { position: fixed; bottom: 28px; right: 28px; width: 54px; height: 54px; background: linear-gradient(135deg, var(--violet), var(--blue)); border: none; border-radius: 16px; color: #fff; cursor: pointer; z-index: 200; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
-.overlay { position: fixed; inset: 0; background: rgba(5,5,8,.82); backdrop-filter: blur(18px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 12px; }
-.modal { background: var(--s1); border: 1px solid var(--border); border-radius: 24px; padding: 24px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
+/* ── EMPTY ── */
+.empty {
+  text-align: center; padding: 30px 16px;
+  color: var(--text3); font-size: .8rem;
+}
+.empty-icon { font-size: 1.6rem; margin-bottom: 6px; opacity: .35; }
+
+/* ── FAB ── */
+.fab {
+  position: fixed; bottom: 28px; right: 28px;
+  width: 54px; height: 54px;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+  border: none; border-radius: 16px; color: #fff;
+  cursor: pointer; z-index: 200;
+  box-shadow: 0 8px 28px rgba(124,106,247,.35);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s, box-shadow .15s;
+}
+.fab:hover { transform: scale(1.06) translateY(-2px); box-shadow: 0 14px 36px rgba(124,106,247,.45); }
+.fab:active { transform: scale(.96); }
+
+/* ── OVERLAY ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(5,5,8,.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: none; align-items: flex-end; justify-content: center;
+  z-index: 1000; padding: 12px;
+}
+@media (min-width: 600px) { .overlay { align-items: center; } }
+
+.modal {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 24px; padding: 24px;
+  width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto;
+  animation: slideUp .24s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(18px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 22px;
+}
+.modal-title { font-size: 1rem; font-weight: 800; color: var(--text); }
+.modal-close {
+  width: 30px; height: 30px;
+  background: var(--s2); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text2); font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+}
+.modal-close:hover { background: var(--s3); color: var(--text); }
+
+.form-group { margin-bottom: 15px; }
+.form-label {
+  display: block; font-size: .68rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
+}
+input[type="text"], input[type="date"], input[type="number"], select {
+  width: 100%; background: var(--s2); border: 1px solid var(--border);
+  color: var(--text); padding: 10px 13px; border-radius: 11px;
+  font-family: var(--font); font-size: .875rem; font-weight: 500;
+  outline: none; transition: border-color .2s, background .2s;
+  -webkit-appearance: none;
+}
+input:focus, select:focus { border-color: var(--violet); background: var(--s3); }
+select option { background: #1a1a1d; }
+
+.toggle-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 11px; padding: 10px 13px; cursor: pointer;
+  font-size: .875rem; font-weight: 500; color: var(--text2);
+  transition: border-color .2s;
+}
+.toggle-row input[type="checkbox"] { accent-color: var(--violet); width: 15px; height: 15px; flex-shrink: 0; }
+
+.days-row { display: flex; gap: 5px; margin-top: 10px; }
+.day-btn {
+  flex: 1; padding: 8px 0;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 9px; color: var(--text3);
+  font-size: .7rem; font-weight: 600; cursor: pointer;
+  text-align: center; transition: all .15s; font-family: var(--font);
+}
+.day-btn.on { background: var(--violet); color: #fff; border-color: var(--violet); }
+
+.parent-list {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 11px; padding: 8px; margin-top: 8px;
+}
+.parent-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 5px; font-size: .82rem; color: var(--text2);
+  border-bottom: 1px solid var(--border2);
+}
+.parent-row:last-child { border-bottom: none; }
+.parent-row input[type="checkbox"] { accent-color: var(--violet); flex-shrink: 0; }
+.parent-row input[type="number"] { width: 54px; padding: 5px 8px; margin: 0; text-align: center; }
+.parent-row span { flex: 1; }
+
+.btn-save {
+  width: 100%;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+  color: #fff; border: none; padding: 13px;
+  border-radius: 12px; font-family: var(--font);
+  font-size: .9rem; font-weight: 700; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(124,106,247,.28);
+  transition: opacity .15s, transform .12s;
+}
+.btn-save:hover { opacity: .9; transform: translateY(-1px); }
+.btn-cancel {
+  width: 100%; background: none; border: none;
+  color: var(--text3); padding: 10px; font-family: var(--font);
+  font-size: .82rem; cursor: pointer; margin-top: 6px; transition: color .2s;
+}
+.btn-cancel:hover { color: var(--text2); }
+
 .hidden { display: none !important; }
 
-#bravo { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; z-index: 9999; opacity: 0; }
+/* ── BRAVO ── */
+#bravo {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none; z-index: 9999; opacity: 0;
+}
 #bravo.show { animation: bravoAnim 1.8s ease forwards; }
-@keyframes bravoAnim { 0% { opacity:0; transform:scale(.65); } 14% { opacity:1; transform:scale(1.06); } 100% { opacity:0; transform:scale(1.1); } }
-.bravo-word { font-size: clamp(5rem,18vw,10rem); font-weight: 800; background: linear-gradient(135deg, var(--violet), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+@keyframes bravoAnim {
+  0%   { opacity:0; transform:scale(.65); }
+  14%  { opacity:1; transform:scale(1.06); }
+  30%  { transform:scale(.98); }
+  45%  { transform:scale(1.02); }
+  68%  { opacity:1; transform:scale(1); }
+  100% { opacity:0; transform:scale(1.1); }
+}
+.bravo-word {
+  font-size: clamp(5rem,18vw,10rem); font-weight: 800; letter-spacing: 6px;
+  background: linear-gradient(135deg, var(--violet) 0%, var(--blue) 50%, var(--green) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 50px rgba(124,106,247,.6)); line-height: 1;
+}
+.bravo-sub {
+  font-size: .88rem; font-weight: 600; letter-spacing: 5px;
+  text-transform: uppercase; color: rgba(255,255,255,.22); margin-top: 10px;
+}
 </style>
 </head>
 <body>
 
 <div id="bravo">
   <div class="bravo-word">BRAVO</div>
+  <div class="bravo-sub">Objectif accompli</div>
 </div>
 
 <header class="topbar">
@@ -179,13 +330,7 @@ body {
     <div class="logo">P</div>
     <span class="topbar-title">Performance Elite</span>
   </div>
-  <div class="topbar-right">
-    <span id="dateDisplay"></span>
-    <button class="btn-cal-toggle" onclick="openCalendar()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      Calendrier
-    </button>
-  </div>
+  <span id="dateDisplay"></span>
 </header>
 
 <main class="main">
@@ -193,51 +338,86 @@ body {
 </main>
 
 <button class="fab" onclick="openModal()" title="Nouvel objectif">
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>
 </button>
 
+<!-- MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="modal-header" style="display:flex; justify-content:space-between; margin-bottom:20px;">
-      <span class="modal-title" id="modalTitle" style="font-weight:800">Nouvel objectif</span>
-      <button onclick="closeModal()" style="background:none; border:none; color:var(--text3); font-size:20px; cursor:pointer">×</button>
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Nouvel objectif</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
     </div>
     <input type="hidden" id="editId">
-    <div class="form-group">
-      <label class="form-label" style="display:block; font-size:0.65rem; color:var(--text3); text-transform:uppercase; margin-bottom:5px">Nom</label>
-      <input type="text" id="fName" oninput="syncForm()" style="width:100%; background:var(--s2); border:1px solid var(--border); padding:10px; border-radius:10px; color:var(--text)">
-    </div>
-    <div class="form-group hidden" id="grpScope">
-        <label class="form-label">Portée</label>
-        <select id="fScope" onchange="syncForm()" style="width:100%; background:var(--s2); border:1px solid var(--border); padding:10px; border-radius:10px; color:var(--text)">
-          <option value="today">Journalier</option>
-          <option value="week">Semaine</option>
-          <option value="month">Mois</option>
-          <option value="year">Année</option>
-        </select>
-    </div>
-    <div id="grpSubmitBtn" class="hidden" style="margin-top:20px">
-        <button class="btn-save" onclick="saveTask()" style="width:100%; padding:12px; background:var(--violet); border:none; border-radius:12px; color:white; font-weight:700; cursor:pointer">Enregistrer</button>
-    </div>
-  </div>
-</div>
 
-<div class="overlay" id="calOverlay">
-  <div class="modal" style="max-width:500px">
-    <div class="cal-head">
-      <button onclick="changeMonth(-1)" style="background:none; border:none; color:var(--text2); cursor:pointer">←</button>
-      <span id="calMonthLabel" style="font-weight:700; font-size:1rem"></span>
-      <button onclick="changeMonth(1)" style="background:none; border:none; color:var(--text2); cursor:pointer">→</button>
+    <div class="form-group">
+      <label class="form-label">Nom de l'objectif</label>
+      <input type="text" id="fName" placeholder="Ex: Méditer 10 minutes…" oninput="syncForm()">
     </div>
-    <div class="cal-grid" id="calendarGrid"></div>
-    <button onclick="closeCalendar()" style="width:100%; margin-top:20px; background:none; border:none; color:var(--text3); cursor:pointer; font-size:0.8rem">Fermer</button>
+
+    <div class="form-group hidden" id="grpScope">
+      <label class="form-label">Portée</label>
+      <select id="fScope" onchange="syncForm()">
+        <option value="today">Journalier</option>
+        <option value="week">Semaine</option>
+        <option value="month">Mois</option>
+        <option value="year">Année</option>
+      </select>
+      <div id="grpDate" class="hidden" style="margin-top:10px;">
+        <label class="form-label">Date précise (optionnel)</label>
+        <input type="date" id="fDate">
+      </div>
+    </div>
+
+    <div class="form-group hidden" id="grpDeps">
+      <label class="form-label">Dépendances</label>
+      <label class="toggle-row">
+        <input type="checkbox" id="fHasDeps" onchange="syncForm()">
+        <span>Ajouter des objectifs parents</span>
+      </label>
+      <div id="parentListWrap" class="hidden">
+        <div class="parent-list" id="parentList"></div>
+      </div>
+    </div>
+
+    <div class="form-group hidden" id="grpRecur">
+      <label class="form-label">Récurrence</label>
+      <select id="fRecur" onchange="syncForm()">
+        <option value="">Unique</option>
+        <option value="Quotidien">Quotidien</option>
+        <option value="Hebdomadaire">Hebdomadaire</option>
+        <option value="Mensuel">Mensuel</option>
+      </select>
+      <div id="grpDays" class="hidden">
+        <div class="days-row" id="daysRow">
+          <div class="day-btn" data-d="1">L</div>
+          <div class="day-btn" data-d="2">M</div>
+          <div class="day-btn" data-d="3">Me</div>
+          <div class="day-btn" data-d="4">J</div>
+          <div class="day-btn" data-d="5">V</div>
+          <div class="day-btn" data-d="6">S</div>
+          <div class="day-btn" data-d="0">D</div>
+        </div>
+      </div>
+      <div id="grpMonthDay" class="hidden" style="margin-top:10px;">
+        <label class="form-label">Jour du mois (1–31)</label>
+        <input type="number" id="fMonthDay" min="1" max="31" value="1">
+      </div>
+    </div>
+
+    <div class="hidden" id="grpSubmitBtn" style="margin-top:4px;">
+      <button class="btn-save" onclick="saveTask()">Enregistrer</button>
+    </div>
+    <button class="btn-cancel" onclick="closeModal()">Annuler</button>
   </div>
 </div>
 
 <script>
 let tasks  = JSON.parse(localStorage.getItem('v28_tasks'))  || [];
 let counts = JSON.parse(localStorage.getItem('v28_counts')) || {};
-let currentCalDate = new Date();
+let selDays = [];
 
 const COLS = [
   { id: 'today', label: "Aujourd'hui" },
@@ -253,146 +433,242 @@ function save() {
   localStorage.setItem('v28_counts', JSON.stringify(counts));
 }
 
-// ── DRAG & DROP ──
-function initDragAndDrop() {
-  document.querySelectorAll('.task-list').forEach(list => {
-    list.addEventListener('dragover', e => {
-      e.preventDefault();
-      const dragging = document.querySelector('.dragging');
-      const afterElement = [...list.querySelectorAll('.task-card:not(.dragging)')].reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = e.clientY - box.top - box.height / 2;
-        return (offset < 0 && offset > closest.offset) ? { offset, element: child } : closest;
-      }, { offset: Number.NEGATIVE_INFINITY }).element;
-      if (!afterElement) list.appendChild(dragging); else list.insertBefore(dragging, afterElement);
-    });
-    list.addEventListener('drop', () => {
-      const newTasks = [];
-      document.querySelectorAll('.task-card').forEach(el => newTasks.push(tasks.find(t => t.id === el.dataset.id)));
-      tasks.forEach(t => { if(!newTasks.find(nt => nt.id === t.id)) newTasks.push(t); });
-      tasks = newTasks; save();
-    });
-  });
+function timeLeft(s) {
+  const n = new Date();
+  if (s === 'today') return `${23 - n.getHours()}h ${59 - n.getMinutes()}m restantes`;
+  if (s === 'week')  return `${7 - (n.getDay() || 7)} jours restants`;
+  if (s === 'month') return `${new Date(n.getFullYear(), n.getMonth()+1, 0).getDate() - n.getDate()} jours restants`;
+  return `${11 - n.getMonth()} mois restants`;
 }
 
-// ── CALENDRIER ──
-function openCalendar() {
-  document.getElementById('calOverlay').style.display = 'flex';
-  renderCalendar();
-}
-function closeCalendar() { document.getElementById('calOverlay').style.display = 'none'; }
-function changeMonth(dir) {
-  currentCalDate.setMonth(currentCalDate.getMonth() + dir);
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const grid = document.getElementById('calendarGrid');
-  const label = document.getElementById('calMonthLabel');
-  grid.innerHTML = '';
-
-  const year = currentCalDate.getFullYear();
-  const month = currentCalDate.getMonth();
-  label.textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(currentCalDate);
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDay = new Date(year, month, 1).getDay();
-  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
-
-  ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].forEach(d => {
-    grid.insertAdjacentHTML('beforeend', `<div class="cal-day-name">${d}</div>`);
-  });
-
-  for (let i = 0; i < startOffset; i++) grid.insertAdjacentHTML('beforeend', `<div class="cal-cell empty"></div>`);
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const dObj = new Date(year, month, day);
-    const isToday = new Date().toDateString() === dObj.toDateString();
-    
-    // Trouver les tâches pour ce jour
-    const dayTasks = tasks.filter(t => {
-        if (t.scope === 'today') return true; // simplifié pour la démo
-        return false;
-    });
-
-    let dotsHtml = '<div class="cal-dots">';
-    // On affiche max 3 points pour le design
-    const colors = ['#7c6af7', '#5b9cf6', '#34d399'];
-    for(let j=0; j<Math.min(dayTasks.length, 3); j++) {
-        dotsHtml += `<div class="dot" style="background:${colors[j]}"></div>`;
-    }
-    dotsHtml += '</div>';
-
-    grid.insertAdjacentHTML('beforeend', `
-      <div class="cal-cell ${isToday ? 'today' : ''}">
-        ${day}
-        ${dayTasks.length > 0 ? dotsHtml : ''}
-      </div>
-    `);
+function taskVisible(t, id, now, tod, ws, we) {
+  if (t.scope !== id) return false;
+  if (!t.date && !t.recurrence) return true;
+  if (t.date) {
+    const d = new Date(t.date);
+    if (id === 'today') return t.date === tod;
+    if (id === 'week')  return d >= ws && d <= we;
+    if (id === 'month') return d.getMonth() === now.getMonth();
+    if (id === 'year')  return d.getFullYear() === now.getFullYear();
   }
+  if (t.recurrence === 'Quotidien')    return true;
+  if (t.recurrence === 'Hebdomadaire') return t.recurDays.includes(now.getDay());
+  if (t.recurrence === 'Mensuel')      return now.getDate() == t.recurMonthDay;
+  return true;
 }
 
-// ── LOGIQUE DE BASE ──
+function parentProgress(t) {
+  if (!t.requirements?.length) return 100;
+  const n = t.requirements.reduce((a,r) => a + r.quota, 0);
+  const g = t.requirements.reduce((a,r) => a + Math.min(counts[r.parentId]||0, r.quota), 0);
+  return n ? (g/n)*100 : 100;
+}
+
+function isLocked(t) {
+  return !t.completed && t.requirements?.some(r => (counts[r.parentId]||0) < r.quota);
+}
+
 function render() {
   const now = new Date();
-  document.getElementById('dateDisplay').textContent = now.toLocaleDateString('fr-FR', { day:'numeric', month:'long' });
+  const tod = now.toISOString().split('T')[0];
+  const ws  = new Date(now); ws.setDate(now.getDate() - (now.getDay()===0 ? 6 : now.getDay()-1));
+  const we  = new Date(ws); we.setDate(ws.getDate()+6);
+
+  document.getElementById('dateDisplay').textContent =
+    now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
   COLS.forEach(col => {
-    const c = COL_COLOR[col.id];
-    const vis = tasks.filter(t => t.scope === col.id);
-    const done = vis.filter(t => t.completed).length;
+    const c     = COL_COLOR[col.id];
+    const vis   = tasks.filter(t => taskVisible(t, col.id, now, tod, ws, we));
+    const done  = vis.filter(t => t.completed).length;
     const total = vis.length;
-    const pct = total ? Math.round(done/total*100) : 0;
-    const C = 100.5, offset = C - (pct/100)*C;
+    const pct   = total ? Math.round(done/total*100) : 0;
 
-    const items = vis.map(t => `
-      <li class="task-card${t.completed?' done':''}" draggable="true" data-id="${t.id}" ondragstart="this.classList.add('dragging')" ondragend="this.classList.remove('dragging')">
-        <div class="task-top"><span class="recur-pill">Unique</span><button class="del-btn" onclick="deleteTask('${t.id}')">×</button></div>
-        <div class="task-body"><div class="check" onclick="toggleTask('${t.id}')"></div><span class="task-text">${t.text}</span></div>
-      </li>`).join('');
+    // SVG ring
+    const R = 16, C = 2*Math.PI*R;
+    const offset = C - (pct/100)*C;
+
+    const items = total === 0
+      ? `<div class="empty"><div class="empty-icon">✦</div>Aucun objectif pour cette période</div>`
+      : vis.map(t => {
+          const prog   = parentProgress(t);
+          const locked = isLocked(t);
+          return `
+            <li class="task-card${t.completed?' done':''}${locked?' locked':''}">
+              <div class="task-top">
+                <span class="recur-pill">${t.recurrence||'Unique'}</span>
+                <button class="del-btn" onclick="deleteTask('${t.id}')" title="Supprimer">
+                  <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                    <path d="M1 1l7 7M8 1L1 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="task-body">
+                <div class="check" onclick="toggleTask('${t.id}')"></div>
+                <span class="task-text" onclick="openEditModal('${t.id}')">${t.text}</span>
+              </div>
+              ${t.requirements?.length ? `
+                <div class="sub-prog">
+                  <div class="sub-prog-fill" style="width:${prog}%;background:linear-gradient(90deg,${c},${c}99)"></div>
+                </div>` : ''}
+            </li>`;
+        }).join('');
 
     grid.insertAdjacentHTML('beforeend', `
       <div class="col">
         <div class="col-header">
           <div class="col-top">
-            <span class="col-title">${col.label}</span>
-            <div class="ring-wrap">
-              <svg width="42" height="42" viewBox="0 0 42 42"><circle class="ring-bg" cx="21" cy="21" r="16"/><circle class="ring-fill" cx="21" cy="21" r="16" stroke="${c}" stroke-dasharray="100.5" stroke-dashoffset="${offset}"/></svg>
-              <span class="ring-pct" style="color:${c}">${pct}%</span>
+            <div class="col-label-wrap">
+              <span class="col-title">${col.label}</span>
+              <span class="time-left">${timeLeft(col.id)}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="ring-wrap">
+                <svg width="42" height="42" viewBox="0 0 42 42">
+                  <circle class="ring-bg" cx="21" cy="21" r="${R}"/>
+                  <circle class="ring-fill" cx="21" cy="21" r="${R}"
+                    stroke="${c}"
+                    stroke-dasharray="${C.toFixed(2)}"
+                    stroke-dashoffset="${offset.toFixed(2)}"/>
+                </svg>
+                <span class="ring-pct" style="color:${c}">${pct}%</span>
+              </div>
+              <span class="col-count">${done}/${total}</span>
             </div>
           </div>
+          <div class="prog-track">
+            <div class="prog-bar" style="width:${pct}%;background:${c}"></div>
+          </div>
         </div>
-        <ul class="task-list">${items || '<div class="empty">Vide</div>'}</ul>
+        <ul class="task-list">${items}</ul>
       </div>`);
   });
-  initDragAndDrop();
+
   save();
 }
 
-function openModal() { document.getElementById('overlay').style.display='flex'; }
-function closeModal() { document.getElementById('overlay').style.display='none'; }
+function toggleTask(id) {
+  const t = tasks.find(t => t.id===id);
+  if (!t) return;
+  if (isLocked(t)) return alert('Pré-requis insuffisants.');
+  t.completed = !t.completed;
+  counts[t.id] = (counts[t.id]||0) + (t.completed ? 1 : -1);
+  if (t.completed) celebrate();
+  render();
+}
+
+function celebrate() {
+  const el = document.getElementById('bravo');
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1900);
+  confetti({ particleCount:80, spread:90, origin:{y:.5}, colors:['#7c6af7','#5b9cf6','#34d399','#fbbf24','#fff'] });
+  setTimeout(() => {
+    confetti({ particleCount:45, angle:60,  spread:55, origin:{x:0,y:.65}, colors:['#7c6af7','#fbbf24'] });
+    confetti({ particleCount:45, angle:120, spread:55, origin:{x:1,y:.65}, colors:['#34d399','#5b9cf6'] });
+  }, 200);
+  setTimeout(() => confetti({ particleCount:28, spread:60, origin:{y:.4}, shapes:['star'], colors:['#fbbf24','#7c6af7'] }), 450);
+}
+
+function deleteTask(id) {
+  if (!confirm('Supprimer cet objectif ?')) return;
+  tasks = tasks.filter(t => t.id !== id);
+  render();
+}
+
+function openModal(data=null) {
+  document.getElementById('modalTitle').textContent = data ? "Modifier l'objectif" : 'Nouvel objectif';
+  document.getElementById('editId').value    = data?.id   || '';
+  document.getElementById('fName').value     = data?.text || '';
+  document.getElementById('fScope').value    = data?.scope || 'today';
+  document.getElementById('fDate').value     = data?.date  || '';
+  document.getElementById('fRecur').value    = data?.recurrence || '';
+  document.getElementById('fMonthDay').value = data?.recurMonthDay || 1;
+  document.getElementById('fHasDeps').checked = !!(data?.requirements?.length);
+  selDays = data?.recurDays ? [...data.recurDays] : [];
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.toggle('on', selDays.includes(+b.dataset.d)));
+  buildParentList(data?.requirements||[]);
+  syncForm();
+  document.getElementById('overlay').style.display = 'flex';
+}
+
+function openEditModal(id) { openModal(tasks.find(t => t.id===id)); }
+function closeModal()       { document.getElementById('overlay').style.display='none'; }
+
 function syncForm() {
-    const name = document.getElementById('fName').value;
-    document.getElementById('grpScope').classList.toggle('hidden', !name);
-    document.getElementById('grpSubmitBtn').classList.toggle('hidden', !name);
+  const name   = document.getElementById('fName').value.trim();
+  const scope  = document.getElementById('fScope').value;
+  const recur  = document.getElementById('fRecur').value;
+  const deps   = document.getElementById('fHasDeps').checked;
+  const editId = document.getElementById('editId').value;
+  const others = tasks.filter(t => t.id !== editId);
+
+  toggle('grpScope',       name.length > 0);
+  toggle('grpDate',        name.length > 0 && scope === 'today');
+  toggle('grpDeps',        name.length > 0 && others.length > 0);
+  toggle('parentListWrap', deps);
+  toggle('grpRecur',       name.length > 0);
+  toggle('grpDays',        recur === 'Hebdomadaire');
+  toggle('grpMonthDay',    recur === 'Mensuel');
+  toggle('grpSubmitBtn',   name.length > 0);
 }
+
+function toggle(id, show) {
+  document.getElementById(id).classList.toggle('hidden', !show);
+}
+
+function buildParentList(existing=[]) {
+  const editId = document.getElementById('editId').value;
+  document.getElementById('parentList').innerHTML = tasks
+    .filter(t => t.id !== editId)
+    .map(t => {
+      const req = existing.find(r => r.parentId===t.id);
+      return `<div class="parent-row">
+        <input type="checkbox" class="pc" value="${t.id}" ${req?'checked':''}>
+        <span>${t.text}</span>
+        <input type="number" class="pq" value="${req?.quota||1}" min="1">
+      </div>`;
+    }).join('');
+}
+
+document.getElementById('daysRow').addEventListener('click', e => {
+  const btn = e.target.closest('.day-btn');
+  if (!btn) return;
+  const d = +btn.dataset.d;
+  btn.classList.toggle('on');
+  selDays = btn.classList.contains('on') ? [...selDays,d] : selDays.filter(x=>x!==d);
+});
+
 function saveTask() {
-    const t = { id: 'T-'+Date.now(), text: document.getElementById('fName').value, scope: document.getElementById('fScope').value, completed: false };
-    tasks.push(t); closeModal(); render();
+  const id  = document.getElementById('editId').value;
+  const reqs = document.getElementById('fHasDeps').checked
+    ? Array.from(document.querySelectorAll('.parent-row'))
+        .filter(r => r.querySelector('.pc').checked)
+        .map(r => ({ parentId: r.querySelector('.pc').value, quota: +r.querySelector('.pq').value||1 }))
+    : [];
+
+  const t = {
+    id:            id || 'T-'+Date.now(),
+    text:          document.getElementById('fName').value.trim(),
+    scope:         document.getElementById('fScope').value,
+    date:          document.getElementById('fScope').value==='today' ? document.getElementById('fDate').value : '',
+    recurrence:    document.getElementById('fRecur').value,
+    recurDays:     [...selDays],
+    recurMonthDay: +document.getElementById('fMonthDay').value,
+    requirements:  reqs,
+    completed:     id ? (tasks.find(x=>x.id===id)?.completed||false) : false,
+  };
+
+  tasks = id ? tasks.map(x => x.id===id ? t : x) : [...tasks, t];
+  closeModal();
+  render();
 }
-function toggleTask(id) { 
-    const t = tasks.find(x => x.id === id); 
-    t.completed = !t.completed; 
-    if(t.completed) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#7c6af7', '#34d399'] });
-        const b = document.getElementById('bravo'); b.classList.add('show'); setTimeout(()=>b.classList.remove('show'), 1800);
-    }
-    render(); 
-}
-function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); render(); }
+
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeModal();
+});
 
 render();
 </script>
