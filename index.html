@@ -3,160 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Dashboard d'Objectifs</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/contfetti.browser.min.js"></script>
+    <title>Mon Dashboard Vision</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --bg-color: #121212; --text-color: #e0e0e0; --container-bg: #1e1e1e; --task-bg: #252525; --dynamic-color: hsl(0, 70%, 50%); --google-blue: #4285F4; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background-color: var(--container-bg); padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.7); width: 100%; max-width: 550px; border: 1px solid #333; }
-        
-        /* Onglets */
-        .tabs { display: flex; justify-content: space-around; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .tab-btn { background: none; border: none; color: #666; cursor: pointer; font-weight: bold; font-size: 0.9rem; padding: 8px 12px; transition: all 0.3s; }
-        .tab-btn.active { color: var(--dynamic-color); border-bottom: 2px solid var(--dynamic-color); }
-        
-        .header-info { text-align: center; margin-bottom: 20px; }
-        #globalCountdown { font-family: monospace; font-size: 1.5rem; color: var(--dynamic-color); }
-        .progress-container { background-color: #333; border-radius: 10px; height: 10px; overflow: hidden; margin-top: 10px; }
-        .progress-bar { height: 100%; width: 0%; background-color: var(--dynamic-color); transition: width 0.5s ease; }
-        
-        .input-group { display: flex; gap: 10px; margin: 20px 0; }
-        input[type="text"] { flex-grow: 1; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #121212; color: white; }
-        button#addBtn { padding: 10px 20px; background: var(--dynamic-color); color: #000; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        
-        ul { list-style: none; padding: 0; }
-        li { background-color: var(--task-bg); padding: 15px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; }
-        .task-info { flex-grow: 1; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .checkbox { width: 20px; height: 20px; border: 2px solid #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .checked { background-color: var(--dynamic-color); border-color: var(--dynamic-color); }
-        .checked::after { content: '✓'; color: #000; font-weight: bold; font-size: 12px; }
+        :root {
+            --bg-color: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --accent: #BB86FC;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { text-align: center; color: var(--accent); font-weight: 300; letter-spacing: 2px; }
+
+        /* Grille principale */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        /* Colonnes (Cards) */
+        .column {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+        }
+
+        .column-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .column-title {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        /* Barre de progression spécifique à chaque colonne */
+        .progress-container {
+            background: #333;
+            height: 6px;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+
+        /* Inputs */
+        .input-group {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        input {
+            flex: 1;
+            background: #121212;
+            border: 1px solid #444;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .add-btn {
+            background: var(--accent);
+            border: none;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 0 12px;
+        }
+
+        /* Listes */
+        ul { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        li {
+            background: #252525;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .task-text { cursor: pointer; flex-grow: 1; }
         .completed { text-decoration: line-through; color: #666; }
-        .delete-btn { background: none; border: none; color: #ff5555; cursor: pointer; font-size: 1.2rem; }
+        .delete-btn { color: #ff5555; cursor: pointer; background: none; border: none; font-size: 1.1rem; }
 
-        /* --- SECTION AGENDA --- */
-        .agenda-header { margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-        #auth_button { background: var(--google-blue); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
-        .event-list { margin-top: 15px; }
-        .event-item { background: #1a1a1a; border-left: 4px solid var(--google-blue); padding: 10px; margin-bottom: 8px; border-radius: 5px; font-size: 0.9rem; }
-        .event-time { color: #888; font-size: 0.75rem; display: block; }
+        /* Agenda Link Section */
+        .calendar-box {
+            grid-column: 1 / -1;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px dashed var(--accent);
+            margin-top: 20px;
+        }
+        .calendar-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+        }
 
-        #bravoOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; z-index: 100; background: rgba(0,0,0,0.85); }
-        #bravoOverlay h1 { font-size: 4rem; color: #FFD700; animation: pop 0.8s ease-out; }
-        @keyframes pop { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Bravo Overlay */
+        #bravoOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; z-index: 100; background: rgba(0,0,0,0.8); }
+        #bravoOverlay h2 { font-size: 5rem; color: gold; text-shadow: 0 0 20px orange; }
     </style>
 </head>
 <body>
 
-<div id="bravoOverlay"><h1>BRAVO !</h1></div>
+<div id="bravoOverlay"><h2>BRAVO !</h2></div>
 
-<div class="container">
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('journalier')">JOUR</button>
-        <button class="tab-btn" onclick="switchTab('hebdomadaire')">SEMAINE</button>
-        <button class="tab-btn" onclick="switchTab('mensuel')">MOIS</button>
-        <button class="tab-btn" onclick="switchTab('annuel')">ANNÉE</button>
+<h1>MY VISION DASHBOARD</h1>
+
+<div class="calendar-box">
+    📅 <strong>Agenda :</strong> <a href="https://calendar.google.com" target="_blank" class="calendar-link">Ouvrir mon Google Calendar en un clic</a>
+</div>
+
+<div class="dashboard-grid">
+    <div class="column" id="col-journalier">
+        <div class="column-header">
+            <div class="column-title">Aujourd'hui</div>
+            <div class="progress-container"><div class="progress-bar"></div></div>
+            <small class="perc">0%</small>
+        </div>
+        <div class="input-group">
+            <input type="text" placeholder="Nouvelle tâche..." onkeypress="handleEnter(event, 'journalier')">
+            <button class="add-btn" onclick="addTask('journalier')">+</button>
+        </div>
+        <ul id="list-journalier"></ul>
     </div>
 
-    <div class="header-info">
-        <span id="timerLabel">Temps restant :</span><br>
-        <strong id="globalCountdown">00:00:00</strong>
-        <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-        <small id="progressPercent" style="color: var(--dynamic-color)">0%</small>
+    <div class="column" id="col-hebdomadaire">
+        <div class="column-header">
+            <div class="column-title">Cette Semaine</div>
+            <div class="progress-container"><div class="progress-bar"></div></div>
+            <small class="perc">0%</small>
+        </div>
+        <div class="input-group">
+            <input type="text" placeholder="Objectif hebdo..." onkeypress="handleEnter(event, 'hebdomadaire')">
+            <button class="add-btn" onclick="addTask('hebdomadaire')">+</button>
+        </div>
+        <ul id="list-hebdomadaire"></ul>
     </div>
 
-    <div class="input-group">
-        <input type="text" id="taskInput" placeholder="Ajouter un objectif...">
-        <button id="addBtn">Ajouter</button>
+    <div class="column" id="col-mensuel">
+        <div class="column-header">
+            <div class="column-title">Ce Mois</div>
+            <div class="progress-container"><div class="progress-bar"></div></div>
+            <small class="perc">0%</small>
+        </div>
+        <div class="input-group">
+            <input type="text" placeholder="Objectif mensuel..." onkeypress="handleEnter(event, 'mensuel')">
+            <button class="add-btn" onclick="addTask('mensuel')">+</button>
+        </div>
+        <ul id="list-mensuel"></ul>
     </div>
 
-    <ul id="taskList"></ul>
-
-    <div class="agenda-header">
-        <h3>📅 Mon Agenda</h3>
-        <button id="auth_button">Connecter Google</button>
+    <div class="column" id="col-annuel">
+        <div class="column-header">
+            <div class="column-title">Cette Année</div>
+            <div class="progress-container"><div class="progress-bar"></div></div>
+            <small class="perc">0%</small>
+        </div>
+        <div class="input-group">
+            <input type="text" placeholder="Grand rêve..." onkeypress="handleEnter(event, 'annuel')">
+            <button class="add-btn" onclick="addTask('annuel')">+</button>
+        </div>
+        <ul id="list-annuel"></ul>
     </div>
-    <div id="event_list" class="event-list"></div>
 </div>
 
 <script>
-    // --- CONFIGURATION GOOGLE ---
-    const CLIENT_ID = '80889993235-3qutt2522r5sit4n779qp09rj84rmb58.apps.googleusercontent.com'; 
-    const API_KEY = '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';
-    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
-    const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+    let allData = JSON.parse(localStorage.getItem('multiColumnGoals')) || { 
+        journalier: [], hebdomadaire: [], mensuel: [], annuel: [] 
+    };
 
-    let tokenClient;
-    let gapiInited = false;
-    let gisInited = false;
+    function handleEnter(e, type) { if(e.key === 'Enter') addTask(type); }
 
-    // --- LOGIQUE OBJECTIFS ---
-    let currentTab = 'journalier';
-    let allData = JSON.parse(localStorage.getItem('tabbedGoals')) || { journalier: [], hebdomadaire: [], mensuel: [], annuel: [] };
-    const taskInput = document.getElementById('taskInput');
-    const taskList = document.getElementById('taskList');
-
-    function switchTab(tabName) {
-        currentTab = tabName;
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if(btn.innerText.toLowerCase().includes(tabName.substring(0,3))) btn.classList.add('active');
-        });
+    function addTask(type) {
+        const input = document.querySelector(`#col-${type} input`);
+        if (input.value.trim() === '') return;
+        
+        allData[type].push({ id: Date.now(), text: input.value, completed: false });
+        input.value = '';
         updateUI();
     }
 
-    function updateGlobalTimer() {
-        const now = new Date();
-        let target = new Date();
-        let label = "Temps restant :";
-        if (currentTab === 'journalier') { target.setHours(24, 0, 0, 0); label = "Temps restant aujourd'hui :"; }
-        else if (currentTab === 'hebdomadaire') { const day = now.getDay(); const diff = (day === 0 ? 0 : 7 - day); target.setDate(now.getDate() + diff); target.setHours(24, 0, 0, 0); label = "Fin de semaine dans :"; }
-        else if (currentTab === 'mensuel') { target = new Date(now.getFullYear(), now.getMonth() + 1, 1); label = "Fin du mois dans :"; }
-        else { target = new Date(now.getFullYear() + 1, 0, 1); label = "Fin de l'année dans :"; }
-        const diff = target - now;
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const m = Math.floor((diff / 1000 / 60) % 60);
-        const s = Math.floor((diff / 1000) % 60);
-        document.getElementById('timerLabel').innerText = label;
-        document.getElementById('globalCountdown').innerText = (d > 0 ? d + "j " : "") + `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    }
-
-    function updateUI() {
-        taskList.innerHTML = '';
-        const currentTasks = allData[currentTab];
-        currentTasks.forEach(task => {
-            const li = document.createElement('li');
-            li.innerHTML = `<div class="task-info" onclick="toggleTask(${task.id})"><div class="checkbox ${task.completed ? 'checked' : ''}"></div><span class="${task.completed ? 'completed' : ''}">${task.text}</span></div><button class="delete-btn" onclick="deleteTask(${task.id})">×</button>`;
-            taskList.appendChild(li);
-        });
-        const total = currentTasks.length;
-        const completed = currentTasks.filter(t => t.completed).length;
-        const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-        const hue = (percentage * 1.2);
-        const color = `hsl(${hue}, 70%, 50%)`;
-        document.getElementById('progressBar').style.width = percentage + '%';
-        document.getElementById('progressBar').style.backgroundColor = color;
-        document.getElementById('progressPercent').innerText = percentage + '%';
-        document.documentElement.style.setProperty('--dynamic-color', color);
-        if (percentage === 100 && total > 0) { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }
-        localStorage.setItem('tabbedGoals', JSON.stringify(allData));
-    }
-
-    function addTask() {
-        if (taskInput.value.trim() === '') return;
-        allData[currentTab].push({ id: Date.now(), text: taskInput.value, completed: false });
-        taskInput.value = '';
-        updateUI();
-    }
-
-    function toggleTask(id) {
-        allData[currentTab] = allData[currentTab].map(t => {
+    function toggleTask(type, id) {
+        allData[type] = allData[type].map(t => {
             if (t.id === id) {
-                if(!t.completed) {
-                    const bravo = document.getElementById('bravoOverlay');
-                    bravo.style.display = 'flex';
-                    setTimeout(() => bravo.style.display = 'none', 800);
-                }
+                if(!t.completed) showBravo();
                 return {...t, completed: !t.completed};
             }
             return t;
@@ -164,95 +224,58 @@
         updateUI();
     }
 
-    function deleteTask(id) {
-        allData[currentTab] = allData[currentTab].filter(t => t.id !== id);
+    function deleteTask(type, id) {
+        allData[type] = allData[type].filter(t => t.id !== id);
         updateUI();
     }
 
-    // --- LOGIQUE GOOGLE API ---
-    function gapiLoaded() { gapi.load('client', async () => { await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] }); gapiInited = true; }); }
-    function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID, scope: SCOPES,
-            callback: async (resp) => { if (resp.error !== undefined) throw (resp); await listUpcomingEvents(); }
-        });
-        gisInited = true;
+    function showBravo() {
+        const overlay = document.getElementById('bravoOverlay');
+        overlay.style.display = 'flex';
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        setTimeout(() => overlay.style.display = 'none', 1000);
     }
 
-    async function listUpcomingEvents() {
-        try {
-            // On demande les événements à Google
-            const response = await gapi.client.calendar.events.list({
-                'calendarId': 'primary',
-                'timeMin': (new Date()).toISOString(),
-                'showDeleted': false,
-                'singleEvents': true,
-                'maxResults': 5,
-                'orderBy': 'startTime',
-            });
+    function updateUI() {
+        ['journalier', 'hebdomadaire', 'mensuel', 'annuel'].forEach(type => {
+            const list = document.getElementById(`list-${type}`);
+            const tasks = allData[type];
+            list.innerHTML = '';
 
-            // On vérifie que Google a bien répondu quelque chose de lisible
-            if (!response || !response.result) {
-                console.error("Réponse vide de Google");
-                return;
-            }
-
-            const events = response.result.items;
-            const listDiv = document.getElementById('event_list');
-            listDiv.innerHTML = ''; // On vide le message de chargement
-
-            // Si l'agenda est vide
-            if (!events || events.length == 0) {
-                listDiv.innerHTML = '<p style="color: #888; text-align:center;">Aucun événement à venir.</p>';
-                return;
-            }
-
-            // On crée l'affichage pour chaque événement trouvé
-            events.forEach(event => {
-                const start = event.start.dateTime || event.start.date;
-                const dateStr = new Date(start).toLocaleString('fr-FR', { 
-                    weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' 
-                });
-                
-                const div = document.createElement('div');
-                div.className = 'event-item';
-                div.innerHTML = `
-                    <span class="event-time" style="color: #888; font-size: 0.75rem; display: block;">${dateStr}</span>
-                    <strong style="display: block; margin-top: 2px;">${event.summary}</strong>
+            tasks.forEach(t => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="task-text ${t.completed ? 'completed' : ''}" onclick="toggleTask('${type}', ${t.id})">
+                        ${t.completed ? '✅ ' : '⭕ '} ${t.text}
+                    </span>
+                    <button class="delete-btn" onclick="deleteTask('${type}', ${t.id})">×</button>
                 `;
-                listDiv.appendChild(div);
+                list.appendChild(li);
             });
-            
-            // On change le texte du bouton pour indiquer que c'est fait
-            document.getElementById('auth_button').innerText = "Actualiser l'Agenda";
 
-        } catch (err) {
-            // Si une erreur arrive (ex: API non activée), on l'affiche proprement
-            console.error("Erreur détaillée :", err);
-            const listDiv = document.getElementById('event_list');
+            // Calcul progression
+            const total = tasks.length;
+            const comp = tasks.filter(t => t.completed).length;
+            const percent = total === 0 ? 0 : Math.round((comp/total)*100);
             
-            if(err.status === 403) {
-                listDiv.innerHTML = '<p style="color: #ff9800; font-size: 0.9rem; padding: 10px; border: 1px solid #ff9800; border-radius: 5px;">⚠️ Erreur 403 : Allez dans votre Console Google Cloud et vérifiez que "Google Calendar API" est bien ACTIVÉE.</p>';
-            } else {
-                listDiv.innerHTML = '<p style="color: #ff5555;">Une erreur est survenue lors de la connexion à l\'agenda.</p>';
-            }
-        }
+            const col = document.getElementById(`col-${type}`);
+            const bar = col.querySelector('.progress-bar');
+            const percText = col.querySelector('.perc');
+            
+            bar.style.width = percent + '%';
+            // Couleur dynamique (Rouge -> Orange -> Vert)
+            const hue = percent * 1.2; // 0 = Rouge, 120 = Vert
+            bar.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
+            percText.innerText = percent + '%';
+            percText.style.color = `hsl(${hue}, 70%, 50%)`;
+        });
+        
+        localStorage.setItem('multiColumnGoals', JSON.stringify(allData));
     }
 
-    document.getElementById('auth_button').onclick = () => {
-        if (gapi.client.getToken() === null) { tokenClient.requestAccessToken({prompt: 'consent'}); } 
-        else { tokenClient.requestAccessToken({prompt: ''}); }
-    };
-
-    setInterval(updateGlobalTimer, 1000);
-    document.getElementById('addBtn').addEventListener('click', addTask);
-    taskInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
-    
-    updateGlobalTimer();
+    // Initialisation
     updateUI();
 </script>
 
-<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
