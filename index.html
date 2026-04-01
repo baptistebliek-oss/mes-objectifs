@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Elite - V9 Automation</title>
+    <title>Performance Elite - V9.5 Cycle de Vie</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -120,8 +120,10 @@
             <label>Récurrence (Auto-Reset)</label>
             <select id="taskRecur">
                 <option value="">Une seule fois</option>
-                <option value="Quotidien">🔄 Quotidien (Reset Minuit)</option>
-                <option value="Hebdomadaire">📅 Hebdo (Reset Lundi)</option>
+                <option value="Quotidien">🔄 Quotidien</option>
+                <option value="Hebdomadaire">📅 Hebdomadaire</option>
+                <option value="Mensuel">🗓️ Mensuel</option>
+                <option value="Annuel">🎆 Annuel</option>
             </select>
         </div>
         <button class="btn-add" onclick="createNewTask()">LANCER LA MISSION</button>
@@ -148,50 +150,53 @@
 <div class="dashboard-grid" id="mainGrid"></div>
 
 <script>
-    // --- INITIALISATION DES DONNÉES ---
-    let allData = JSON.parse(localStorage.getItem('v9_performance_data')) || { journalier: [], hebdomadaire: [], mensuel: [], annuel: [] };
-    let historyData = JSON.parse(localStorage.getItem('v9_history_data')) || {};
-    let lastVisit = localStorage.getItem('v9_last_visit'); // Format YYYY-MM-DD
+    let allData = JSON.parse(localStorage.getItem('v95_performance_data')) || { journalier: [], hebdomadaire: [], mensuel: [], annuel: [] };
+    let historyData = JSON.parse(localStorage.getItem('v95_history_data')) || {};
+    let lastVisit = localStorage.getItem('v95_last_visit');
 
     const types = [{id:'journalier', label:"Aujourd'hui"}, {id:'hebdomadaire', label:"Hebdo"}, {id:'mensuel', label:"Mensuel"}, {id:'annuel', label:"Annuel"}];
 
-    // --- LOGIQUE D'AUTOMATISATION ---
     function checkDateReset() {
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
 
         if (lastVisit && lastVisit !== todayStr) {
-            const lastVisitDate = new Date(lastVisit);
+            const lastDate = new Date(lastVisit);
             
-            // 1. Reset Quotidien
             Object.keys(allData).forEach(col => {
                 allData[col] = allData[col].filter(task => {
-                    if (task.recurrence === "Quotidien") {
-                        task.completed = false; // On décoche
+                    // Logic for Daily
+                    if (task.recurrence === "Quotidien") { task.completed = false; return true; }
+                    
+                    // Logic for Weekly (reset on Monday)
+                    if (task.recurrence === "Hebdomadaire") {
+                        if (now.getDay() === 1 || (now - lastDate > 86400000 * 7)) task.completed = false;
                         return true;
                     }
-                    if (task.completed) return false; // On supprime les tâches finies non-récurrentes
+
+                    // Logic for Monthly (reset on 1st of month)
+                    if (task.recurrence === "Mensuel") {
+                        if (now.getMonth() !== lastDate.getMonth()) task.completed = false;
+                        return true;
+                    }
+
+                    // Logic for Yearly (reset on Jan 1st)
+                    if (task.recurrence === "Annuel") {
+                        if (now.getFullYear() !== lastDate.getFullYear()) task.completed = false;
+                        return true;
+                    }
+
+                    // Clean up non-recurring tasks that were completed
+                    if (task.completed) return false;
                     return true;
                 });
             });
-
-            // 2. Reset Hebdomadaire (si on a changé de semaine - passage à un lundi)
-            // On vérifie si un Lundi est passé entre lastVisit et aujourd'hui
-            if (now.getDay() === 1 || (now - lastVisitDate > 86400000 * 7)) {
-                Object.keys(allData).forEach(col => {
-                    allData[col].forEach(task => {
-                        if (task.recurrence === "Hebdomadaire") task.completed = false;
-                    });
-                });
-            }
         }
-        localStorage.setItem('v9_last_visit', todayStr);
+        localStorage.setItem('v95_last_visit', todayStr);
     }
 
-    // --- FONCTIONS UI ---
     function initGrid() {
-        const grid = document.getElementById('mainGrid');
-        grid.innerHTML = '';
+        const grid = document.getElementById('mainGrid'); grid.innerHTML = '';
         types.forEach(t => {
             grid.innerHTML += `
                 <div class="column" id="col-${t.id}">
@@ -276,7 +281,7 @@
             col.querySelector('.progress-bar').style.backgroundColor = `hsl(0, 100%, ${30+(percent*0.4)}%)`;
             col.querySelector('.perc').innerText = percent + '%';
         });
-        localStorage.setItem('v9_performance_data', JSON.stringify(allData));
+        localStorage.setItem('v95_performance_data', JSON.stringify(allData));
         renderMiniHeatmap();
     }
 
@@ -305,7 +310,7 @@
         let total = 0, comp = 0;
         Object.values(allData).forEach(arr => { total += arr.length; comp += arr.filter(t=>t.completed).length; });
         historyData[today] = total === 0 ? 0 : Math.round((comp/total)*100);
-        localStorage.setItem('v9_history_data', JSON.stringify(historyData));
+        localStorage.setItem('v95_history_data', JSON.stringify(historyData));
         for (let i = 25; i >= 0; i--) {
             const d = new Date(); d.setDate(d.getDate() - i);
             const key = d.toISOString().split('T')[0];
@@ -334,7 +339,6 @@
         return (day?d+"d ":"")+ (h%24).toString().padStart(2,0)+":"+(m%60).toString().padStart(2,0)+":"+(s%60).toString().padStart(2,0);
     }
 
-    // --- LANCEMENT ---
     checkDateReset();
     initGrid();
     setInterval(updateTimers, 1000);
