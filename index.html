@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Performance Elite v6</title>
+    <title>Dashboard Performance Elite v7</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -11,61 +11,56 @@
             --accent-red: #ff3c3c; --cat-sport: #4CAF50; --cat-travail: #2196F3; --cat-perso: #FFEB3B; --cat-finance: #9C27B0; --cat-autre: #555;
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
-        h1 { color: var(--accent-red); font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin: 5px 0; font-size: 1.5rem; }
-
-        /* --- MINI HEATMAP TOP --- */
-        .mini-history { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; border: 1px solid #1a1a1a; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        /* Mini Heatmap Header */
+        .mini-history { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 8px 15px; border-radius: 30px; margin-bottom: 20px; border: 1px solid #1a1a1a; }
         .heatmap-mini { display: flex; gap: 3px; }
         .day-sq { width: 8px; height: 8px; border-radius: 1px; background: #222; position: relative; }
-        .day-sq:hover::after { content: attr(data-info); position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 3px 6px; border-radius: 4px; font-size: 9px; white-space: nowrap; z-index: 100; }
-        
-        .btn-full-history { background: none; border: 1px solid var(--accent-red); color: var(--accent-red); font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; cursor: pointer; text-transform: uppercase; font-weight: bold; transition: 0.3s; }
-        .btn-full-history:hover { background: var(--accent-red); color: black; }
+        .day-sq:hover::after { content: attr(data-info); position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 3px 6px; border-radius: 4px; font-size: 9px; white-space: nowrap; z-index: 1000; }
 
-        /* --- DASHBOARD GRID --- */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; max-width: 1400px; }
+        /* Dashboard Grid */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; max-width: 1400px; padding-bottom: 100px; }
         .column { background: var(--card-bg); border-radius: 16px; padding: 18px; border: 1px solid #1a1a1a; display: flex; flex-direction: column; }
-        .column-header { text-align: center; margin-bottom: 10px; }
+        .column-header { text-align: center; margin-bottom: 15px; }
         .column-title { font-size: 1.1rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; }
         .timer { font-family: monospace; font-size: 0.75rem; color: #666; }
-
-        /* Progression */
         .progress-container { background: #1a1a1a; height: 5px; border-radius: 10px; margin: 10px 0; overflow: hidden; border: 1px solid #222; }
         .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease; }
         .perc { font-size: 0.75rem; font-weight: bold; }
 
-        /* Catégories Dots */
-        .category-selector { display: flex; justify-content: center; gap: 6px; margin-bottom: 10px; padding: 5px; background: #000; border-radius: 10px; }
-        .cat-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 2px solid transparent; transition: 0.2s; opacity: 0.3; }
-        .cat-dot.active { opacity: 1; border-color: white; transform: scale(1.1); }
-        .dot-sport { background: var(--cat-sport); } .dot-travail { background: var(--cat-travail); } .dot-perso { background: var(--cat-perso); } .dot-finance { background: var(--cat-finance); } .dot-autre { background: var(--cat-autre); }
-
-        /* Inputs */
-        .input-group { display: flex; gap: 5px; }
-        input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; outline: none; font-size: 0.9rem; }
-        input:focus { border-color: var(--accent-red); }
-        .add-btn { background: var(--accent-red); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; padding: 0 15px; }
-
-        /* Listes */
-        ul { list-style: none; padding: 0; margin-top: 15px; }
-        li { background: #181818; margin-bottom: 8px; padding: 12px; border-radius: 10px; display: flex; flex-direction: column; border-left: 3px solid var(--accent-red); }
-        .badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 900; margin-bottom: 6px; width: fit-content; }
+        /* List Items */
+        ul { list-style: none; padding: 0; }
+        li { background: #181818; margin-bottom: 8px; padding: 12px; border-radius: 10px; border-left: 3px solid var(--accent-red); position: relative; transition: 0.2s; }
+        li:hover { transform: translateX(5px); }
+        .badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 900; margin-bottom: 6px; width: fit-content; display: inline-block; }
+        .recur-badge { font-size: 0.55rem; background: #333; color: #aaa; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
         .badge-sport { background: var(--cat-sport); color: #000; } .badge-travail { background: var(--cat-travail); color: #fff; } .badge-perso { background: var(--cat-perso); color: #000; } .badge-finance { background: var(--cat-finance); color: #fff; } .badge-autre { background: var(--cat-autre); color: #fff; }
         .task-header { display: flex; justify-content: space-between; align-items: center; }
         .task-text { cursor: pointer; flex-grow: 1; font-size: 0.9rem; }
         .completed { text-decoration: line-through; color: #444; opacity: 0.4; }
         .delete-btn { color: #333; cursor: pointer; background: none; border: none; font-size: 1.1rem; }
 
-        /* --- OVERLAY HISTORIQUE COMPLET --- */
-        #historyOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; z-index: 1000; padding: 40px 20px; overflow-y: auto; }
-        .full-heatmap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; max-width: 600px; width: 100%; margin-top: 20px; }
-        .day-cell { background: #111; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #222; }
-        .day-cell .date-label { font-size: 0.7rem; color: #666; display: block; }
-        .day-cell .score-label { font-size: 1rem; font-weight: bold; margin-top: 5px; }
-        .close-history { background: var(--accent-red); border: none; color: white; padding: 10px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 30px; }
+        /* --- BOUTON D'ACTION FLOTTANT --- */
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 60, 60, 0.4); border: none; z-index: 100; transition: transform 0.2s; }
+        .fab:hover { transform: scale(1.1); }
 
-        #bravoOverlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 2000; background: rgba(0,0,0,0.9); }
+        /* --- MODALE D'AJOUT --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 500; }
+        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 20px; width: 90%; max-width: 450px; border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .modal-content h3 { color: var(--accent-red); margin-top: 0; text-transform: uppercase; font-size: 1.1rem; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        input, select { width: 100%; background: #080808; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; box-sizing: border-box; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-add { background: var(--accent-red); color: white; border: none; padding: 12px; border-radius: 8px; flex: 2; font-weight: bold; cursor: pointer; }
+        .btn-cancel { background: #333; color: white; border: none; padding: 12px; border-radius: 8px; flex: 1; cursor: pointer; }
+
+        /* Overlays */
+        #historyOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; z-index: 1000; padding: 40px 20px; overflow-y: auto; }
+        .full-heatmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; width: 100%; max-width: 800px; margin-top: 20px; }
+        .day-cell { background: #111; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #222; }
+        #bravoOverlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 2000; background: rgba(0,0,0,0.9); pointer-events: none; }
         #bravoOverlay h2 { font-size: 5rem; color: var(--accent-red); font-weight: 900; }
     </style>
 </head>
@@ -73,27 +68,69 @@
 
 <div id="bravoOverlay"><h2>BAM !</h2></div>
 
+<button class="fab" onclick="toggleModal(true)">+</button>
+
+<div class="modal" id="addModal">
+    <div class="modal-content">
+        <h3>Nouvel Objectif</h3>
+        <div class="form-group">
+            <label>Nom de l'objectif</label>
+            <input type="text" id="taskName" placeholder="Ex: Séance de sport..." autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Colonne de destination</label>
+            <select id="taskTarget">
+                <option value="journalier">Aujourd'hui</option>
+                <option value="hebdomadaire">Cette Semaine</option>
+                <option value="mensuel">Ce Mois</option>
+                <option value="annuel">Cette Année</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Catégorie</label>
+            <select id="taskCat">
+                <option value="sport">🏃 Sport</option>
+                <option value="travail">💼 Travail</option>
+                <option value="perso">🏠 Perso</option>
+                <option value="finance">💰 Finance</option>
+                <option value="autre">📍 Autre</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Récurrence (Note)</label>
+            <select id="taskRecur">
+                <option value="">Aucune</option>
+                <option value="Quotidien">🔄 Quotidien</option>
+                <option value="Hebdo">📅 Hebdo</option>
+            </select>
+        </div>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="toggleModal(false)">Annuler</button>
+            <button class="btn-add" onclick="createNewTask()">Ajouter au Dashboard</button>
+        </div>
+    </div>
+</div>
+
 <div id="historyOverlay">
-    <h2 style="color:var(--accent-red); text-transform: uppercase;">Historique de Discipline</h2>
-    <p id="stats-summary" style="color:#888;">Chargement des statistiques...</p>
+    <h2 style="color:var(--accent-red);">HISTORIQUE COMPLET</h2>
+    <p id="stats-summary" style="color:#666;"></p>
     <div class="full-heatmap" id="fullHeatmap"></div>
-    <button class="close-history" onclick="toggleFullHistory(false)">Fermer l'historique</button>
+    <button style="margin-top:20px;" class="btn-cancel" onclick="toggleFullHistory(false)">Fermer</button>
 </div>
 
 <h1>PERFORMANCE DASHBOARD</h1>
 
 <div class="mini-history">
-    <span style="font-size: 0.7rem; color: #888; font-weight: bold;">30j :</span>
+    <span style="font-size: 0.7rem; color: #888; font-weight: bold;">DISCIPLINE :</span>
     <div class="heatmap-mini" id="miniHeatmap"></div>
-    <button class="btn-full-history" onclick="toggleFullHistory(true)">Voir tout</button>
+    <button style="background:none; border:1px solid #333; color:#888; font-size:0.6rem; padding:2px 8px; border-radius:10px; cursor:pointer;" onclick="toggleFullHistory(true)">DETAILS</button>
 </div>
 
 <div class="dashboard-grid" id="mainGrid"></div>
 
 <script>
-    let allData = JSON.parse(localStorage.getItem('v6_performance_data')) || { journalier: [], hebdomadaire: [], mensuel: [], annuel: [] };
-    let historyData = JSON.parse(localStorage.getItem('v6_history_data')) || {};
-    let selectedCats = { journalier: 'sport', hebdomadaire: 'sport', mensuel: 'sport', annuel: 'sport' };
+    let allData = JSON.parse(localStorage.getItem('v7_performance_data')) || { journalier: [], hebdomadaire: [], mensuel: [], annuel: [] };
+    let historyData = JSON.parse(localStorage.getItem('v7_history_data')) || {};
 
     const types = [
         {id: 'journalier', label: "Aujourd'hui"},
@@ -102,7 +139,6 @@
         {id: 'annuel', label: "Année"}
     ];
 
-    // Génération Colonnes
     const grid = document.getElementById('mainGrid');
     types.forEach(t => {
         grid.innerHTML += `
@@ -113,34 +149,34 @@
                     <div class="progress-container"><div class="progress-bar"></div></div>
                     <span class="perc">0%</span>
                 </div>
-                <div class="category-selector" id="cats-${t.id}">
-                    <div class="cat-dot dot-sport active" onclick="selectCat('${t.id}', 'sport')">🏃</div>
-                    <div class="cat-dot dot-travail" onclick="selectCat('${t.id}', 'travail')">💼</div>
-                    <div class="cat-dot dot-perso" onclick="selectCat('${t.id}', 'perso')">🏠</div>
-                    <div class="cat-dot dot-finance" onclick="selectCat('${t.id}', 'finance')">💰</div>
-                    <div class="cat-dot dot-autre" onclick="selectCat('${t.id}', 'autre')">📍</div>
-                </div>
-                <div class="input-group">
-                    <input type="text" id="in-${t.id}" placeholder="Objectif..." onkeypress="if(event.key==='Enter')addTask('${t.id}')">
-                    <button class="add-btn" onclick="addTask('${t.id}')">+</button>
-                </div>
                 <ul id="list-${t.id}"></ul>
             </div>
         `;
     });
 
-    function selectCat(type, cat) {
-        selectedCats[type] = cat;
-        const container = document.getElementById(`cats-${type}`);
-        container.querySelectorAll('.cat-dot').forEach(d => d.classList.remove('active'));
-        container.querySelector(`.dot-${cat}`).classList.add('active');
+    function toggleModal(show) {
+        document.getElementById('addModal').style.display = show ? 'flex' : 'none';
+        if(show) document.getElementById('taskName').focus();
     }
 
-    function addTask(type) {
-        const input = document.getElementById(`in-${type}`);
-        if (input.value.trim() === '') return;
-        allData[type].push({ id: Date.now(), text: input.value, category: selectedCats[type], completed: false });
-        input.value = '';
+    function createNewTask() {
+        const name = document.getElementById('taskName').value;
+        const target = document.getElementById('taskTarget').value;
+        const cat = document.getElementById('taskCat').value;
+        const recur = document.getElementById('taskRecur').value;
+
+        if (name.trim() === '') return;
+
+        allData[target].push({
+            id: Date.now(),
+            text: name,
+            category: cat,
+            recurrence: recur,
+            completed: false
+        });
+
+        document.getElementById('taskName').value = '';
+        toggleModal(false);
         updateUI();
     }
 
@@ -168,25 +204,21 @@
     }
 
     function toggleFullHistory(show) {
-        const overlay = document.getElementById('historyOverlay');
-        overlay.style.display = show ? 'flex' : 'none';
+        document.getElementById('historyOverlay').style.display = show ? 'flex' : 'none';
         if(show) renderFullHistory();
     }
 
-    // --- RENDU HISTORIQUE ---
     function renderMiniHeatmap() {
-        const mini = document.getElementById('miniHeatmap');
-        mini.innerHTML = '';
+        const mini = document.getElementById('miniHeatmap'); mini.innerHTML = '';
         const today = new Date();
+        const dateKey = today.toISOString().split('T')[0];
         
-        // Calcul score aujourd'hui
         let total = 0, comp = 0;
         Object.values(allData).forEach(arr => { total += arr.length; comp += arr.filter(t=>t.completed).length; });
-        const score = total === 0 ? 0 : Math.round((comp/total)*100);
-        historyData[today.toISOString().split('T')[0]] = score;
-        localStorage.setItem('v6_history_data', JSON.stringify(historyData));
+        historyData[dateKey] = total === 0 ? 0 : Math.round((comp/total)*100);
+        localStorage.setItem('v7_history_data', JSON.stringify(historyData));
 
-        for (let i = 29; i >= 0; i--) {
+        for (let i = 20; i >= 0; i--) {
             const d = new Date(); d.setDate(today.getDate() - i);
             const key = d.toISOString().split('T')[0];
             const val = historyData[key] || 0;
@@ -199,25 +231,16 @@
     }
 
     function renderFullHistory() {
-        const full = document.getElementById('fullHeatmap');
-        const stats = document.getElementById('stats-summary');
-        full.innerHTML = '';
-        
+        const full = document.getElementById('fullHeatmap'); full.innerHTML = '';
         const keys = Object.keys(historyData).sort().reverse();
-        let avg = 0;
-        
         keys.forEach(key => {
             const val = historyData[key];
-            avg += val;
             const cell = document.createElement('div');
             cell.className = 'day-cell';
             cell.style.borderColor = val > 0 ? `hsl(0, 100%, ${val/2}%)` : '#222';
-            cell.innerHTML = `<span class="date-label">${key}</span><span class="score-label" style="color:hsl(0,100%,${Math.max(40, val/1.2)}%)">${val}%</span>`;
+            cell.innerHTML = `<span style="font-size:0.6rem; color:#555;">${key}</span><br><b>${val}%</b>`;
             full.appendChild(cell);
         });
-
-        const mean = keys.length ? Math.round(avg / keys.length) : 0;
-        stats.innerText = `Enregistré sur ${keys.length} jours — Moyenne de discipline : ${mean}%`;
     }
 
     function updateTimers() {
@@ -240,11 +263,11 @@
         types.forEach(t => {
             const list = document.getElementById(`list-${t.id}`);
             list.innerHTML = '';
-            const tasks = allData[t.id];
-            tasks.forEach(tk => {
+            allData[t.id].forEach(tk => {
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <span class="badge badge-${tk.category}">${tk.category}</span>
+                    ${tk.recurrence ? `<span class="recur-badge">${tk.recurrence}</span>` : ''}
                     <div class="task-header">
                         <span class="task-text ${tk.completed ? 'completed' : ''}" onclick="toggleTask('${t.id}', ${tk.id})">${tk.text}</span>
                         <button class="delete-btn" onclick="deleteTask('${t.id}', ${tk.id})">×</button>
@@ -252,13 +275,13 @@
                 `;
                 list.appendChild(li);
             });
-            const percent = tasks.length === 0 ? 0 : Math.round((tasks.filter(tk=>tk.completed).length / tasks.length)*100);
+            const percent = allData[t.id].length === 0 ? 0 : Math.round((allData[t.id].filter(tk=>tk.completed).length / allData[t.id].length)*100);
             const col = document.getElementById(`col-${t.id}`);
             col.querySelector('.progress-bar').style.width = percent + '%';
             col.querySelector('.progress-bar').style.backgroundColor = `hsl(0, 100%, ${30+(percent*0.4)}%)`;
             col.querySelector('.perc').innerText = percent + '%';
         });
-        localStorage.setItem('v6_performance_data', JSON.stringify(allData));
+        localStorage.setItem('v7_performance_data', JSON.stringify(allData));
         renderMiniHeatmap();
     }
 
