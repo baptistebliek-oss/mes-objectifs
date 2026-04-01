@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Elite v21 - Logique Contextuelle</title>
+    <title>Performance Elite v22 - Chronos Intégral</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -68,11 +68,11 @@
         
         <div class="form-step" id="step-name" style="display:block;">
             <label>Titre de l'objectif</label>
-            <input type="text" id="taskName" placeholder="Ex: Devenir un Maître..." oninput="checkSteps()">
+            <input type="text" id="taskName" placeholder="Ex: Gagner la guerre..." oninput="checkSteps()">
         </div>
 
         <div class="form-step" id="step-scope">
-            <label>Portée</label>
+            <label>Portée temporelle</label>
             <select id="taskScope" onchange="checkSteps()">
                 <option value="today">Journalier</option>
                 <option value="week">Semaine</option>
@@ -89,15 +89,15 @@
         <div class="form-step" id="step-dep-toggle">
             <label class="toggle-container">
                 <input type="checkbox" id="hasDeps" onchange="checkSteps()">
-                <span>Cet objectif a des pré-requis ?</span>
+                <span>Ajouter des pré-requis ?</span>
             </label>
             <div class="parent-selector" id="parentList" style="display:none;"></div>
         </div>
 
         <div class="form-step" id="step-recur">
-            <label>Fréquence</label>
+            <label>Récurrence automatique</label>
             <select id="taskRecur" onchange="checkSteps()">
-                <option value="">Unique</option>
+                <option value="">Mission Unique</option>
                 <option value="Quotidien">Quotidien</option>
                 <option value="Hebdomadaire">Hebdomadaire</option>
                 <option value="Mensuel">Mensuel</option>
@@ -113,24 +113,28 @@
     </div>
 </div>
 
-<h1>PERFORMANCE ELITE v21</h1>
+<h1 id="currentDateDisplay" style="font-size:0.9rem; color:#444; letter-spacing:2px; margin-bottom:5px;">CHARGE EN COURS...</h1>
 <div class="dashboard-grid" id="mainGrid"></div>
 <button class="fab" onclick="openCreateModal()">+</button>
 
 <script>
-    let allTasks = JSON.parse(localStorage.getItem('v21_tasks')) || [];
-    let totalCounts = JSON.parse(localStorage.getItem('v21_counts')) || {};
-    const columns = [{ id: 'today', label: "Journalier" }, { id: 'week', label: "Semaine" }, { id: 'month', label: "Mois" }, { id: 'year', label: "Année" }];
+    let allTasks = JSON.parse(localStorage.getItem('v22_tasks')) || [];
+    let totalCounts = JSON.parse(localStorage.getItem('v22_counts')) || {};
+    const columns = [
+        { id: 'today', label: "Journalier" },
+        { id: 'week', label: "Semaine" },
+        { id: 'month', label: "Mois" },
+        { id: 'year', label: "Année" }
+    ];
 
     function checkSteps() {
         const name = document.getElementById('taskName').value.trim();
         const scope = document.getElementById('taskScope').value;
         const hasDeps = document.getElementById('hasDeps').checked;
         
-        // Step Scope
         document.getElementById('step-scope').style.display = name.length > 0 ? 'block' : 'none';
         
-        // Logique spécifique : Date seulement si "Journalier"
+        // La date ne s'affiche QUE pour Journalier
         document.getElementById('dateWrapper').style.display = (scope === 'today') ? 'block' : 'none';
 
         if (name.length > 0) {
@@ -231,6 +235,8 @@
         grid.innerHTML = '';
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
+        document.getElementById('currentDateDisplay').innerText = now.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
+
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
         const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
@@ -238,7 +244,8 @@
         columns.forEach(col => {
             let filtered = allTasks.filter(t => {
                 if (t.scope !== col.id) return false;
-                if (!t.date) return true;
+                if (!t.date) return true; // Permanent si pas de date
+                
                 const tDate = new Date(t.date);
                 if (col.id === 'today') return t.date === todayStr;
                 if (col.id === 'week') return tDate >= startOfWeek && tDate <= endOfWeek;
@@ -255,7 +262,7 @@
                 listHtml += `
                     <li class="task-card ${tk.completed ? 'completed' : ''} ${isLocked && !tk.completed ? 'locked' : ''}">
                         <div style="display:flex; justify-content:space-between; align-items:center">
-                            <span class="badge" style="font-size:0.6rem; color:#555">${tk.recurrence || 'UNIQUE'}</span>
+                            <span class="badge" style="font-size:0.6rem; color:#555">${tk.recurrence || 'MISSION UNIQUE'}</span>
                             <div style="display:flex; align-items:center; gap:8px">
                                 <span class="stat-badge">Σ ${totalCounts[tk.id]||0}</span>
                                 <button onclick="deleteTask('${tk.id}')" style="background:none; border:none; color:#333; cursor:pointer;">×</button>
@@ -281,8 +288,8 @@
                 </div>`;
         });
 
-        localStorage.setItem('v21_tasks', JSON.stringify(allTasks));
-        localStorage.setItem('v21_counts', JSON.stringify(totalCounts));
+        localStorage.setItem('v22_tasks', JSON.stringify(allTasks));
+        localStorage.setItem('v22_counts', JSON.stringify(totalCounts));
     }
 
     function deleteTask(id) { if(confirm("Supprimer ?")) { allTasks = allTasks.filter(t => t.id !== id); updateUI(); } }
