@@ -3,65 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Performance Elite v7</title>
+    <title>Performance Elite - Design V8</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-color: #080808; --card-bg: #121212; --text-main: #ffffff; --text-dim: #555;
-            --accent-red: #ff3c3c; --cat-sport: #4CAF50; --cat-travail: #2196F3; --cat-perso: #FFEB3B; --cat-finance: #9C27B0; --cat-autre: #555;
+            --bg-color: #050505; --card-bg: #111111; --text-main: #ffffff; --text-dim: #777;
+            --accent-red: #ff3c3c; --accent-red-dim: rgba(255, 60, 60, 0.1);
+            --cat-sport: #4CAF50; --cat-travail: #2196F3; --cat-perso: #FFEB3B; --cat-finance: #9C27B0; --cat-autre: #555;
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { 
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg-color); color: var(--text-main); 
+            margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh; letter-spacing: -0.02em;
+        }
+
+        /* --- MINI HEATMAP --- */
+        .mini-history { 
+            display: flex; align-items: center; gap: 12px; background: #000; 
+            padding: 10px 20px; border-radius: 50px; margin-bottom: 30px; border: 1px solid #222; 
+        }
+        .heatmap-mini { display: flex; gap: 4px; }
+        .day-sq { width: 10px; height: 10px; border-radius: 2px; background: #1a1a1a; transition: 0.3s; }
+
+        /* --- GRILLE & COLONNES --- */
+        .dashboard-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 25px; width: 100%; max-width: 1400px; padding-bottom: 120px; 
+        }
+        .column { 
+            background: var(--card-bg); border-radius: 24px; padding: 24px; 
+            border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .column-header { text-align: left; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; }
+        .column-title { font-size: 1.3rem; font-weight: 800; color: var(--accent-red); text-transform: uppercase; letter-spacing: 1px; }
+        .timer { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-dim); display: block; margin-top: 4px; }
         
-        /* Mini Heatmap Header */
-        .mini-history { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 8px 15px; border-radius: 30px; margin-bottom: 20px; border: 1px solid #1a1a1a; }
-        .heatmap-mini { display: flex; gap: 3px; }
-        .day-sq { width: 8px; height: 8px; border-radius: 1px; background: #222; position: relative; }
-        .day-sq:hover::after { content: attr(data-info); position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 3px 6px; border-radius: 4px; font-size: 9px; white-space: nowrap; z-index: 1000; }
+        .progress-info { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .progress-container { background: #1a1a1a; height: 4px; flex-grow: 1; border-radius: 10px; margin-right: 15px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; transition: width 1s cubic-bezier(0.19, 1, 0.22, 1); }
+        .perc { font-size: 0.8rem; font-weight: 900; color: var(--accent-red); }
 
-        /* Dashboard Grid */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; max-width: 1400px; padding-bottom: 100px; }
-        .column { background: var(--card-bg); border-radius: 16px; padding: 18px; border: 1px solid #1a1a1a; display: flex; flex-direction: column; }
-        .column-header { text-align: center; margin-bottom: 15px; }
-        .column-title { font-size: 1.1rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; }
-        .timer { font-family: monospace; font-size: 0.75rem; color: #666; }
-        .progress-container { background: #1a1a1a; height: 5px; border-radius: 10px; margin: 10px 0; overflow: hidden; border: 1px solid #222; }
-        .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease; }
-        .perc { font-size: 0.75rem; font-weight: bold; }
+        /* --- AFFICHAGE DES OBJECTIFS --- */
+        ul { list-style: none; padding: 0; margin: 0; }
+        .task-card { 
+            background: linear-gradient(145deg, #181818, #141414);
+            margin-bottom: 12px; padding: 16px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.03);
+            display: flex; flex-direction: column; gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .task-card:hover { transform: translateY(-3px); border-color: rgba(255, 60, 60, 0.3); background: #1c1c1c; }
+        
+        .task-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .task-main { display: flex; align-items: center; gap: 12px; }
+        
+        /* Custom Checkbox */
+        .check-circle { 
+            width: 22px; height: 22px; border: 2px solid #333; border-radius: 50%; 
+            cursor: pointer; flex-shrink: 0; transition: all 0.2s; position: relative;
+        }
+        .task-card.completed .check-circle { background: var(--accent-red); border-color: var(--accent-red); }
+        .task-card.completed .check-circle::after { 
+            content: '✓'; position: absolute; color: white; font-size: 14px; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
 
-        /* List Items */
-        ul { list-style: none; padding: 0; }
-        li { background: #181818; margin-bottom: 8px; padding: 12px; border-radius: 10px; border-left: 3px solid var(--accent-red); position: relative; transition: 0.2s; }
-        li:hover { transform: translateX(5px); }
-        .badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 900; margin-bottom: 6px; width: fit-content; display: inline-block; }
-        .recur-badge { font-size: 0.55rem; background: #333; color: #aaa; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-        .badge-sport { background: var(--cat-sport); color: #000; } .badge-travail { background: var(--cat-travail); color: #fff; } .badge-perso { background: var(--cat-perso); color: #000; } .badge-finance { background: var(--cat-finance); color: #fff; } .badge-autre { background: var(--cat-autre); color: #fff; }
-        .task-header { display: flex; justify-content: space-between; align-items: center; }
-        .task-text { cursor: pointer; flex-grow: 1; font-size: 0.9rem; }
-        .completed { text-decoration: line-through; color: #444; opacity: 0.4; }
-        .delete-btn { color: #333; cursor: pointer; background: none; border: none; font-size: 1.1rem; }
+        .task-text { font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .task-card.completed .task-text { color: #444; text-decoration: line-through; }
+        
+        .badges-row { display: flex; gap: 6px; flex-wrap: wrap; }
+        .badge { font-size: 0.6rem; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; font-weight: 800; }
+        .recur-badge { background: rgba(255,255,255,0.05); color: #666; font-size: 0.6rem; padding: 3px 8px; border-radius: 6px; }
 
-        /* --- BOUTON D'ACTION FLOTTANT --- */
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 60, 60, 0.4); border: none; z-index: 100; transition: transform 0.2s; }
-        .fab:hover { transform: scale(1.1); }
+        .delete-btn { color: #333; background: none; border: none; cursor: pointer; font-size: 1.2rem; transition: color 0.2s; }
+        .delete-btn:hover { color: #ff3c3c; }
 
-        /* --- MODALE D'AJOUT --- */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 500; }
-        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 20px; width: 90%; max-width: 450px; border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .modal-content h3 { color: var(--accent-red); margin-top: 0; text-transform: uppercase; font-size: 1.1rem; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; text-transform: uppercase; }
-        input, select { width: 100%; background: #080808; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; box-sizing: border-box; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-add { background: var(--accent-red); color: white; border: none; padding: 12px; border-radius: 8px; flex: 2; font-weight: bold; cursor: pointer; }
-        .btn-cancel { background: #333; color: white; border: none; padding: 12px; border-radius: 8px; flex: 1; cursor: pointer; }
+        /* --- MODALE & FAB --- */
+        .fab { position: fixed; bottom: 40px; right: 40px; width: 64px; height: 64px; background: var(--accent-red); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; cursor: pointer; box-shadow: 0 10px 30px rgba(255, 60, 60, 0.4); border: none; z-index: 100; transition: 0.3s; transform: rotate(0deg); }
+        .fab:hover { transform: scale(1.1) rotate(90deg); }
 
-        /* Overlays */
-        #historyOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; z-index: 1000; padding: 40px 20px; overflow-y: auto; }
-        .full-heatmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; width: 100%; max-width: 800px; margin-top: 20px; }
-        .day-cell { background: #111; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #222; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 500; backdrop-filter: blur(10px); }
+        .modal-content { background: #111; padding: 40px; border-radius: 30px; width: 90%; max-width: 450px; border: 1px solid #222; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.7rem; color: #555; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; }
+        input, select { width: 100%; background: #000; border: 1px solid #222; color: white; padding: 14px; border-radius: 12px; font-size: 1rem; }
+        .btn-add { background: var(--accent-red); color: white; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; }
+
         #bravoOverlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 2000; background: rgba(0,0,0,0.9); pointer-events: none; }
-        #bravoOverlay h2 { font-size: 5rem; color: var(--accent-red); font-weight: 900; }
+        #bravoOverlay h2 { font-size: 6rem; color: var(--accent-red); font-weight: 900; filter: drop-shadow(0 0 20px var(--accent-red)); }
     </style>
 </head>
 <body>
@@ -72,13 +103,13 @@
 
 <div class="modal" id="addModal">
     <div class="modal-content">
-        <h3>Nouvel Objectif</h3>
+        <h2 style="color:var(--accent-red); margin-bottom:25px; text-transform:uppercase; font-size:1.2rem;">Nouvelle Mission</h2>
         <div class="form-group">
-            <label>Nom de l'objectif</label>
-            <input type="text" id="taskName" placeholder="Ex: Séance de sport..." autocomplete="off">
+            <label>Objectif</label>
+            <input type="text" id="taskName" placeholder="Taper ici..." autocomplete="off">
         </div>
         <div class="form-group">
-            <label>Colonne de destination</label>
+            <label>Échéance</label>
             <select id="taskTarget">
                 <option value="journalier">Aujourd'hui</option>
                 <option value="hebdomadaire">Cette Semaine</option>
@@ -97,47 +128,32 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Récurrence (Note)</label>
+            <label>Récurrence</label>
             <select id="taskRecur">
-                <option value="">Aucune</option>
+                <option value="">Une seule fois</option>
                 <option value="Quotidien">🔄 Quotidien</option>
-                <option value="Hebdo">📅 Hebdo</option>
+                <option value="Hebdomadaire">📅 Hebdo</option>
             </select>
         </div>
-        <div class="modal-btns">
-            <button class="btn-cancel" onclick="toggleModal(false)">Annuler</button>
-            <button class="btn-add" onclick="createNewTask()">Ajouter au Dashboard</button>
-        </div>
+        <button class="btn-add" onclick="createNewTask()">LANCER LA MISSION</button>
+        <button style="background:none; border:none; color:#444; width:100%; margin-top:15px; cursor:pointer;" onclick="toggleModal(false)">Annuler</button>
     </div>
 </div>
 
-<div id="historyOverlay">
-    <h2 style="color:var(--accent-red);">HISTORIQUE COMPLET</h2>
-    <p id="stats-summary" style="color:#666;"></p>
-    <div class="full-heatmap" id="fullHeatmap"></div>
-    <button style="margin-top:20px;" class="btn-cancel" onclick="toggleFullHistory(false)">Fermer</button>
-</div>
-
-<h1>PERFORMANCE DASHBOARD</h1>
+<h1>PERFORMANCE ELITE</h1>
 
 <div class="mini-history">
-    <span style="font-size: 0.7rem; color: #888; font-weight: bold;">DISCIPLINE :</span>
     <div class="heatmap-mini" id="miniHeatmap"></div>
-    <button style="background:none; border:1px solid #333; color:#888; font-size:0.6rem; padding:2px 8px; border-radius:10px; cursor:pointer;" onclick="toggleFullHistory(true)">DETAILS</button>
+    <button style="background:none; border:none; color:var(--accent-red); font-size:0.7rem; font-weight:bold; cursor:pointer;" onclick="toggleFullHistory(true)">FULL STATS</button>
 </div>
 
 <div class="dashboard-grid" id="mainGrid"></div>
 
 <script>
-    let allData = JSON.parse(localStorage.getItem('v7_performance_data')) || { journalier: [], hebdomadaire: [], mensuel: [], annuel: [] };
-    let historyData = JSON.parse(localStorage.getItem('v7_history_data')) || {};
+    let allData = JSON.parse(localStorage.getItem('v8_performance_data')) || { journalier: [], hebdomadaire: [], mensuel: [], annuel: [] };
+    let historyData = JSON.parse(localStorage.getItem('v8_history_data')) || {};
 
-    const types = [
-        {id: 'journalier', label: "Aujourd'hui"},
-        {id: 'hebdomadaire', label: "Semaine"},
-        {id: 'mensuel', label: "Mois"},
-        {id: 'annuel', label: "Année"}
-    ];
+    const types = [{id:'journalier', label:"Journalier"}, {id:'hebdomadaire', label:"Hebdo"}, {id:'mensuel', label:"Mensuel"}, {id:'annuel', label:"Annuel"}];
 
     const grid = document.getElementById('mainGrid');
     types.forEach(t => {
@@ -145,9 +161,11 @@
             <div class="column" id="col-${t.id}">
                 <div class="column-header">
                     <div class="column-title">${t.label}</div>
-                    <span class="timer" id="timer-${t.id}">00:00:00</span>
-                    <div class="progress-container"><div class="progress-bar"></div></div>
-                    <span class="perc">0%</span>
+                    <span class="timer" id="timer-${t.id}">--:--:--</span>
+                    <div class="progress-info">
+                        <div class="progress-container"><div class="progress-bar"></div></div>
+                        <span class="perc">0%</span>
+                    </div>
                 </div>
                 <ul id="list-${t.id}"></ul>
             </div>
@@ -164,26 +182,19 @@
         const target = document.getElementById('taskTarget').value;
         const cat = document.getElementById('taskCat').value;
         const recur = document.getElementById('taskRecur').value;
-
-        if (name.trim() === '') return;
-
-        allData[target].push({
-            id: Date.now(),
-            text: name,
-            category: cat,
-            recurrence: recur,
-            completed: false
-        });
-
-        document.getElementById('taskName').value = '';
+        if (!name.trim()) return;
+        allData[target].push({ id: Date.now(), text: name, category: cat, recurrence: recur, completed: false });
         toggleModal(false);
+        document.getElementById('taskName').value = '';
         updateUI();
     }
 
     function toggleTask(type, id) {
         allData[type] = allData[type].map(t => {
             if (t.id === id) {
-                if(!t.completed) showBravo();
+                if(!t.completed) {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 }, colors: ['#ff3c3c', '#ffffff'] });
+                }
                 return {...t, completed: !t.completed};
             }
             return t;
@@ -196,81 +207,24 @@
         updateUI();
     }
 
-    function showBravo() {
-        const overlay = document.getElementById('bravoOverlay');
-        overlay.style.display = 'flex';
-        confetti({ particleCount: 150, spread: 70, colors: ['#ff3c3c', '#ffffff'] });
-        setTimeout(() => overlay.style.display = 'none', 800);
-    }
-
-    function toggleFullHistory(show) {
-        document.getElementById('historyOverlay').style.display = show ? 'flex' : 'none';
-        if(show) renderFullHistory();
-    }
-
-    function renderMiniHeatmap() {
-        const mini = document.getElementById('miniHeatmap'); mini.innerHTML = '';
-        const today = new Date();
-        const dateKey = today.toISOString().split('T')[0];
-        
-        let total = 0, comp = 0;
-        Object.values(allData).forEach(arr => { total += arr.length; comp += arr.filter(t=>t.completed).length; });
-        historyData[dateKey] = total === 0 ? 0 : Math.round((comp/total)*100);
-        localStorage.setItem('v7_history_data', JSON.stringify(historyData));
-
-        for (let i = 20; i >= 0; i--) {
-            const d = new Date(); d.setDate(today.getDate() - i);
-            const key = d.toISOString().split('T')[0];
-            const val = historyData[key] || 0;
-            const sq = document.createElement('div');
-            sq.className = 'day-sq';
-            if(val > 0) sq.style.background = `hsl(0, 100%, ${Math.max(15, val/2)}%)`;
-            sq.setAttribute('data-info', `${key} : ${val}%`);
-            mini.appendChild(sq);
-        }
-    }
-
-    function renderFullHistory() {
-        const full = document.getElementById('fullHeatmap'); full.innerHTML = '';
-        const keys = Object.keys(historyData).sort().reverse();
-        keys.forEach(key => {
-            const val = historyData[key];
-            const cell = document.createElement('div');
-            cell.className = 'day-cell';
-            cell.style.borderColor = val > 0 ? `hsl(0, 100%, ${val/2}%)` : '#222';
-            cell.innerHTML = `<span style="font-size:0.6rem; color:#555;">${key}</span><br><b>${val}%</b>`;
-            full.appendChild(cell);
-        });
-    }
-
-    function updateTimers() {
-        const now = new Date();
-        document.getElementById('timer-journalier').innerText = format(new Date().setHours(23,59,59) - now);
-        const endSun = new Date(); endSun.setDate(now.getDate() + (7 - now.getDay()) % 7); endSun.setHours(23,59,59);
-        document.getElementById('timer-hebdomadaire').innerText = format(endSun - now, true);
-        const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-        document.getElementById('timer-mensuel').innerText = format(endMonth - now, true);
-        const endYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
-        document.getElementById('timer-annuel').innerText = format(endYear - now, true);
-    }
-
-    function format(ms, day=false) {
-        let s=Math.floor(ms/1000), m=Math.floor(s/60), h=Math.floor(m/60), d=Math.floor(h/24);
-        return (day?d+"j ":"")+ (h%24).toString().padStart(2,0)+":"+(m%60).toString().padStart(2,0)+":"+(s%60).toString().padStart(2,0);
-    }
-
     function updateUI() {
         types.forEach(t => {
             const list = document.getElementById(`list-${t.id}`);
             list.innerHTML = '';
             allData[t.id].forEach(tk => {
                 const li = document.createElement('li');
+                li.className = `task-card ${tk.completed ? 'completed' : ''}`;
                 li.innerHTML = `
-                    <span class="badge badge-${tk.category}">${tk.category}</span>
-                    ${tk.recurrence ? `<span class="recur-badge">${tk.recurrence}</span>` : ''}
-                    <div class="task-header">
-                        <span class="task-text ${tk.completed ? 'completed' : ''}" onclick="toggleTask('${t.id}', ${tk.id})">${tk.text}</span>
+                    <div class="task-top">
+                        <div class="badges-row">
+                            <span class="badge" style="background:var(--cat-${tk.category}); color:${tk.category==='perso'||tk.category==='sport'?'#000':'#fff'}">${tk.category}</span>
+                            ${tk.recurrence ? `<span class="recur-badge">${tk.recurrence}</span>` : ''}
+                        </div>
                         <button class="delete-btn" onclick="deleteTask('${t.id}', ${tk.id})">×</button>
+                    </div>
+                    <div class="task-main">
+                        <div class="check-circle" onclick="toggleTask('${t.id}', ${tk.id})"></div>
+                        <span class="task-text" onclick="toggleTask('${t.id}', ${tk.id})">${tk.text}</span>
                     </div>
                 `;
                 list.appendChild(li);
@@ -281,12 +235,45 @@
             col.querySelector('.progress-bar').style.backgroundColor = `hsl(0, 100%, ${30+(percent*0.4)}%)`;
             col.querySelector('.perc').innerText = percent + '%';
         });
-        localStorage.setItem('v7_performance_data', JSON.stringify(allData));
+        localStorage.setItem('v8_performance_data', JSON.stringify(allData));
         renderMiniHeatmap();
     }
 
+    function renderMiniHeatmap() {
+        const mini = document.getElementById('miniHeatmap'); mini.innerHTML = '';
+        const today = new Date().toISOString().split('T')[0];
+        let total = 0, comp = 0;
+        Object.values(allData).forEach(arr => { total += arr.length; comp += arr.filter(t=>t.completed).length; });
+        historyData[today] = total === 0 ? 0 : Math.round((comp/total)*100);
+        localStorage.setItem('v8_history_data', JSON.stringify(historyData));
+        for (let i = 20; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const key = d.toISOString().split('T')[0];
+            const val = historyData[key] || 0;
+            const sq = document.createElement('div');
+            sq.className = 'day-sq';
+            if(val > 0) sq.style.background = `hsl(0, 100%, ${Math.max(15, val/2)}%)`;
+            mini.appendChild(sq);
+        }
+    }
+
+    function updateTimers() {
+        const now = new Date();
+        document.getElementById('timer-journalier').innerText = format(new Date().setHours(23,59,59) - now);
+        const nextSun = new Date(); nextSun.setDate(now.getDate() + (7 - now.getDay()) % 7); nextSun.setHours(23,59,59);
+        document.getElementById('timer-hebdomadaire').innerText = format(nextSun - now, true);
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        document.getElementById('timer-mensuel').innerText = format(nextMonth - now, true);
+        const nextYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+        document.getElementById('timer-annuel').innerText = format(nextYear - now, true);
+    }
+
+    function format(ms, day=false) {
+        let s=Math.floor(ms/1000), m=Math.floor(s/60), h=Math.floor(m/60), d=Math.floor(h/24);
+        return (day?d+"d ":"")+ (h%24).toString().padStart(2,0)+":"+(m%60).toString().padStart(2,0)+":"+(s%60).toString().padStart(2,0);
+    }
+
     setInterval(updateTimers, 1000);
-    updateTimers();
     updateUI();
 </script>
 </body>
