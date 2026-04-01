@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Elite v17 - Focus Hermétique</title>
+    <title>Performance Elite v18 - Liberté Temporelle</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -36,6 +36,7 @@
         
         .task-text { font-weight: 600; cursor: pointer; flex-grow: 1; }
         .date-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: #222; color: #777; margin-top: 5px; display: inline-block; }
+        .perm-badge { background: rgba(33, 150, 243, 0.1); color: #2196F3; }
 
         .stat-badge { font-size: 0.6rem; background: #222; color: #888; padding: 2px 6px; border-radius: 4px; }
         .requirement-list { margin-top: 10px; font-size: 0.7rem; color: var(--accent-gold); border-top: 1px solid rgba(255,188,0,0.1); padding-top: 8px; }
@@ -57,22 +58,22 @@
 
 <div id="taskModal" class="modal">
     <div class="modal-content">
-        <h2 id="modalTitle" style="color:var(--accent-red); margin-top:0;">PLANIFICATION</h2>
+        <h2 id="modalTitle" style="color:var(--accent-red); margin-top:0;">CONFIGURATION</h2>
         <input type="hidden" id="editTaskId">
         <input type="text" id="taskName" placeholder="Titre de la mission...">
         
-        <label style="font-size: 0.7rem; color: #555;">PORTÉE (COLONNE EXCLUSIVE)</label>
+        <label style="font-size: 0.7rem; color: #555;">PORTÉE (COLONNE)</label>
         <select id="taskScope">
-            <option value="today">Aujourd'hui uniquement</option>
-            <option value="week">Hebdo uniquement</option>
-            <option value="month">Mensuel uniquement</option>
-            <option value="year">Annuel uniquement</option>
+            <option value="today">Aujourd'hui</option>
+            <option value="week">Semaine</option>
+            <option value="month">Mois</option>
+            <option value="year">Année</option>
         </select>
 
-        <label style="font-size: 0.7rem; color: #555;">DATE DE RÉFÉRENCE</label>
+        <label style="font-size: 0.7rem; color: #555;">DATE (OPTIONNELLE)</label>
         <input type="date" id="taskDate">
 
-        <label style="font-size: 0.7rem; color: #555;">DÉPENDANCES</label>
+        <label style="font-size: 0.7rem; color: #555;">DÉPENDANCES REQUIRES</label>
         <div class="parent-selector" id="parentList"></div>
 
         <label style="font-size: 0.7rem; color: #555;">RÉCURRENCE AUTOMATIQUE</label>
@@ -84,30 +85,26 @@
             <option value="Annuel">Annuel</option>
         </select>
 
-        <button class="btn-add" onclick="saveTask()">VALIDER</button>
+        <button class="btn-add" onclick="saveTask()">ENREGISTRER</button>
         <button style="width:100%; background:none; border:none; color:#444; margin-top:10px; cursor:pointer;" onclick="closeModal()">Annuler</button>
     </div>
 </div>
 
-<h1>PERFORMANCE ELITE v17</h1>
+<h1>PERFORMANCE ELITE v18</h1>
 <div class="dashboard-grid" id="mainGrid"></div>
 <button class="fab" onclick="openCreateModal()">+</button>
 
 <script>
-    let allTasks = JSON.parse(localStorage.getItem('v17_tasks')) || [];
-    let totalCounts = JSON.parse(localStorage.getItem('v17_counts')) || {};
-    const columns = [
-        { id: 'today', label: "Aujourd'hui" },
-        { id: 'week', label: "Semaine" },
-        { id: 'month', label: "Mois" },
-        { id: 'year', label: "Année" }
-    ];
+    let allTasks = JSON.parse(localStorage.getItem('v18_tasks')) || [];
+    let totalCounts = JSON.parse(localStorage.getItem('v18_counts')) || {};
+    let lastVisit = localStorage.getItem('v18_last_visit');
+    const columns = [{ id: 'today', label: "Aujourd'hui" }, { id: 'week', label: "Semaine" }, { id: 'month', label: "Mois" }, { id: 'year', label: "Année" }];
 
     function openCreateModal() {
         document.getElementById('modalTitle').innerText = "NOUVEAU PLAN";
         document.getElementById('editTaskId').value = "";
         document.getElementById('taskName').value = "";
-        document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('taskDate').value = ""; // Vide par défaut
         renderParentList();
         document.getElementById('taskModal').style.display = 'flex';
     }
@@ -118,7 +115,7 @@
         document.getElementById('modalTitle').innerText = "MODIFICATION";
         document.getElementById('editTaskId').value = id;
         document.getElementById('taskName').value = task.text;
-        document.getElementById('taskDate').value = task.date;
+        document.getElementById('taskDate').value = task.date || "";
         document.getElementById('taskScope').value = task.scope || 'today';
         document.getElementById('taskRecur').value = task.recurrence || "";
         renderParentList(task.requirements || []);
@@ -153,7 +150,7 @@
             quota: parseInt(r.querySelector('.parent-quota').value) || 1
         }));
 
-        if (!name || !date) return;
+        if (!name) return;
 
         if (id) {
             let task = allTasks.find(t => t.id === id);
@@ -185,16 +182,14 @@
         grid.innerHTML = '';
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
-        
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
 
         columns.forEach(col => {
-            // LOGIQUE EXCLUSIVE : t.scope === col.id
             let filtered = allTasks.filter(t => {
                 if (t.scope !== col.id) return false;
+                if (!t.date) return true; // Les permanents sont toujours visibles dans leur scope
                 
                 const tDate = new Date(t.date);
                 if (col.id === 'today') return t.date === todayStr;
@@ -222,7 +217,7 @@
                             <div class="check-circle" onclick="toggleTask('${tk.id}')"></div>
                             <span class="task-text" onclick="openEditModal('${tk.id}')">${tk.text}</span>
                         </div>
-                        <div class="date-badge">${tk.date}</div>
+                        <div class="date-badge ${!tk.date ? 'perm-badge' : ''}">${tk.date || 'OBJECTIF PERMANENT'}</div>
                         ${tk.requirements?.length > 0 ? `<div class="requirement-list">${tk.requirements.map(r => {
                             const p = allTasks.find(at => at.id === r.parentId);
                             return `<div class="req-item"><span>${p?p.text:'?'}</span> <span>${totalCounts[r.parentId]||0}/${r.quota}</span></div>`;
@@ -238,12 +233,28 @@
                 </div>`;
         });
 
-        localStorage.setItem('v17_tasks', JSON.stringify(allTasks));
-        localStorage.setItem('v17_counts', JSON.stringify(totalCounts));
+        localStorage.setItem('v18_tasks', JSON.stringify(allTasks));
+        localStorage.setItem('v18_counts', JSON.stringify(totalCounts));
     }
 
     function deleteTask(id) { if(confirm("Supprimer ?")) { allTasks = allTasks.filter(t => t.id !== id); updateUI(); } }
 
+    function checkReset() {
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        if (lastVisit && lastVisit !== todayStr) {
+            const lastDate = new Date(lastVisit);
+            allTasks.forEach(task => {
+                if (task.recurrence === "Quotidien") task.completed = false;
+                else if (task.recurrence === "Hebdomadaire" && (now.getDay() === 1)) task.completed = false;
+                else if (task.recurrence === "Mensuel" && (now.getMonth() !== lastDate.getMonth())) task.completed = false;
+                else if (task.recurrence === "Annuel" && (now.getFullYear() !== lastDate.getFullYear())) task.completed = false;
+            });
+        }
+        localStorage.setItem('v18_last_visit', todayStr);
+    }
+
+    checkReset();
     updateUI();
 </script>
 </body>
