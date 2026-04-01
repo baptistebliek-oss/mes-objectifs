@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Dashboard Performance Elite</title>
+    <title>Dashboard Performance Elite v5</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -12,135 +12,56 @@
             --text-main: #ffffff;
             --text-dim: #666;
             --accent-red: #ff3c3c;
-            /* Couleurs des catégories */
-            --cat-sport: #4CAF50;
-            --cat-travail: #2196F3;
-            --cat-perso: #FFEB3B;
-            --cat-finance: #9C27B0;
-            --cat-autre: #555;
+            --cat-sport: #4CAF50; --cat-travail: #2196F3; --cat-perso: #FFEB3B; --cat-finance: #9C27B0; --cat-autre: #555;
         }
 
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         h1 { text-align: center; color: var(--accent-red); font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin: 10px 0; }
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-            width: 100%;
-            max-width: 1400px;
-        }
+        /* --- SECTION HISTORIQUE / HEATMAP --- */
+        .history-section { background: var(--card-bg); width: 100%; max-width: 1400px; padding: 20px; border-radius: 16px; border: 1px solid #1a1a1a; margin-bottom: 25px; }
+        .history-title { font-size: 0.9rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; margin-bottom: 15px; text-align: center; }
+        .heatmap { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+        .day-square { width: 12px; height: 12px; border-radius: 2px; background: #1a1a1a; position: relative; cursor: pointer; }
+        .day-square:hover::after { content: attr(data-info); position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; white-space: nowrap; z-index: 10; }
 
-        .column {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
+        /* Grille colonnes */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; width: 100%; max-width: 1400px; }
+        .column { background: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid #1a1a1a; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .column-header { text-align: center; margin-bottom: 15px; }
         .column-title { font-size: 1.2rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; margin-bottom: 5px; }
         .timer { font-family: 'Courier New', monospace; font-size: 0.85rem; color: var(--text-dim); }
 
         /* Progression */
         .progress-container { background: #1a1a1a; height: 6px; border-radius: 10px; margin: 12px 0; overflow: hidden; border: 1px solid #222; }
-        .progress-bar { height: 100%; width: 0%; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease; }
         .perc { font-size: 0.8rem; font-weight: bold; }
 
-        /* --- NOUVEAU SELECTEUR DE CATÉGORIES --- */
-        .category-selector {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 12px;
-            padding: 5px;
-            background: #000;
-            border-radius: 10px;
-        }
-        .cat-dot {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            opacity: 0.4;
-        }
-        .cat-dot:hover { opacity: 1; transform: scale(1.1); }
-        .cat-dot.active { opacity: 1; border-color: white; transform: scale(1.2); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
-
-        .dot-sport { background: var(--cat-sport); }
-        .dot-travail { background: var(--cat-travail); }
-        .dot-perso { background: var(--cat-perso); }
-        .dot-finance { background: var(--cat-finance); }
-        .dot-autre { background: var(--cat-autre); }
+        /* Sélecteur catégories */
+        .category-selector { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; padding: 5px; background: #000; border-radius: 10px; }
+        .cat-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid transparent; transition: all 0.2s; opacity: 0.4; }
+        .cat-dot.active { opacity: 1; border-color: white; transform: scale(1.1); }
+        .dot-sport { background: var(--cat-sport); } .dot-travail { background: var(--cat-travail); } .dot-perso { background: var(--cat-perso); } .dot-finance { background: var(--cat-finance); } .dot-autre { background: var(--cat-autre); }
 
         /* Inputs */
         .input-group { display: flex; gap: 8px; }
-        input { 
-            flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; 
-            padding: 12px; border-radius: 8px; outline: none; transition: border 0.3s;
-        }
+        input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; outline: none; }
         input:focus { border-color: var(--accent-red); }
         .add-btn { background: var(--accent-red); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; padding: 0 18px; }
 
         /* Listes */
         ul { list-style: none; padding: 0; margin-top: 20px; }
-        li {
-            background: #181818;
-            margin-bottom: 12px;
-            padding: 14px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            border-left: 4px solid var(--accent-red);
-            transition: transform 0.2s;
-        }
-        li:hover { transform: translateX(5px); background: #1c1c1c; }
-        
-        .badge {
-            font-size: 0.6rem;
-            padding: 3px 8px;
-            border-radius: 5px;
-            text-transform: uppercase;
-            font-weight: 900;
-            margin-bottom: 8px;
-            width: fit-content;
-        }
-        .badge-sport { background: var(--cat-sport); color: #000; }
-        .badge-travail { background: var(--cat-travail); color: #fff; }
-        .badge-perso { background: var(--cat-perso); color: #000; }
-        .badge-finance { background: var(--cat-finance); color: #fff; }
-        .badge-autre { background: var(--cat-autre); color: #fff; }
-
+        li { background: #181818; margin-bottom: 12px; padding: 14px; border-radius: 10px; display: flex; flex-direction: column; border-left: 4px solid var(--accent-red); }
+        .badge { font-size: 0.6rem; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; font-weight: 900; margin-bottom: 8px; width: fit-content; }
+        .badge-sport { background: var(--cat-sport); color: #000; } .badge-travail { background: var(--cat-travail); color: #fff; } .badge-perso { background: var(--cat-perso); color: #000; } .badge-finance { background: var(--cat-finance); color: #fff; } .badge-autre { background: var(--cat-autre); color: #fff; }
         .task-header { display: flex; justify-content: space-between; align-items: center; }
-        .task-text { cursor: pointer; flex-grow: 1; font-size: 0.95rem; font-weight: 500; }
+        .task-text { cursor: pointer; flex-grow: 1; font-size: 0.95rem; }
         .completed { text-decoration: line-through; color: #444; opacity: 0.5; }
-        .delete-btn { color: #333; cursor: pointer; background: none; border: none; font-size: 1.2rem; margin-left: 10px; }
-        .delete-btn:hover { color: var(--accent-red); }
+        .delete-btn { color: #333; cursor: pointer; background: none; border: none; font-size: 1.2rem; }
 
-        /* Agenda link */
-        .calendar-box { margin-bottom: 30px; }
-        .calendar-link { color: var(--accent-red); text-decoration: none; font-weight: bold; font-size: 0.9rem; letter-spacing: 1px; border: 1px solid #222; padding: 10px 20px; border-radius: 30px; transition: all 0.3s; }
-        .calendar-link:hover { background: var(--accent-red); color: black; }
-
+        .calendar-box { margin-bottom: 20px; }
+        .calendar-link { color: var(--accent-red); text-decoration: none; font-weight: bold; font-size: 0.8rem; border: 1px solid #222; padding: 8px 15px; border-radius: 20px; }
+        
         #bravoOverlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 100; background: rgba(0,0,0,0.95); }
         #bravoOverlay h2 { font-size: 6rem; color: var(--accent-red); font-weight: 900; }
     </style>
@@ -151,75 +72,72 @@
 
 <h1>PERFORMANCE DASHBOARD</h1>
 
+<div class="history-section">
+    <div class="history-title">Historique de Discipline (30 derniers jours)</div>
+    <div class="heatmap" id="heatmap"></div>
+</div>
+
 <div class="calendar-box">
-    <a href="https://calendar.google.com" target="_blank" class="calendar-link">📅 CONSULTER L'AGENDA GOOGLE</a>
+    <a href="https://calendar.google.com" target="_blank" class="calendar-link">📅 CONSULTER GOOGLE CALENDAR</a>
 </div>
 
-<div class="dashboard-grid">
-    <script>
-        const types = [
-            {id: 'journalier', label: "Aujourd'hui"},
-            {id: 'hebdomadaire', label: "Semaine"},
-            {id: 'mensuel', label: "Mois"},
-            {id: 'annuel', label: "Année"}
-        ];
-
-        types.forEach(t => {
-            document.write(`
-                <div class="column" id="col-${t.id}">
-                    <div class="column-header">
-                        <div class="column-title">${t.label}</div>
-                        <span class="timer" id="timer-${t.id}">00:00:00</span>
-                        <div class="progress-container"><div class="progress-bar"></div></div>
-                        <span class="perc">0%</span>
-                    </div>
-                    
-                    <div class="category-selector" id="cats-${t.id}">
-                        <div class="cat-dot dot-sport active" onclick="selectCat('${t.id}', 'sport')" title="Sport">🏃</div>
-                        <div class="cat-dot dot-travail" onclick="selectCat('${t.id}', 'travail')" title="Travail">💼</div>
-                        <div class="cat-dot dot-perso" onclick="selectCat('${t.id}', 'perso')" title="Perso">🏠</div>
-                        <div class="cat-dot dot-finance" onclick="selectCat('${t.id}', 'finance')" title="Finance">💰</div>
-                        <div class="cat-dot dot-autre" onclick="selectCat('${t.id}', 'autre')" title="Autre">📍</div>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" id="in-${t.id}" placeholder="Ajouter un objectif..." onkeypress="if(event.key==='Enter')addTask('${t.id}')">
-                        <button class="add-btn" onclick="addTask('${t.id}')">+</button>
-                    </div>
-                    <ul id="list-${t.id}"></ul>
-                </div>
-            `);
-        });
-    </script>
-</div>
+<div class="dashboard-grid" id="grid"></div>
 
 <script>
-    let allData = JSON.parse(localStorage.getItem('v4_performance_data')) || { 
+    // Initialisation des données
+    let allData = JSON.parse(localStorage.getItem('v5_performance_data')) || { 
         journalier: [], hebdomadaire: [], mensuel: [], annuel: [] 
     };
-
-    // Stockage de la catégorie sélectionnée par colonne (par défaut sport)
+    
+    // Historique des scores (Date: "YYYY-MM-DD", Score: %)
+    let historyData = JSON.parse(localStorage.getItem('v5_history_data')) || {};
     let selectedCats = { journalier: 'sport', hebdomadaire: 'sport', mensuel: 'sport', annuel: 'sport' };
 
-    function selectCat(type, catName) {
-        selectedCats[type] = catName;
-        // Mise à jour visuelle des points
+    const types = [
+        {id: 'journalier', label: "Aujourd'hui"},
+        {id: 'hebdomadaire', label: "Semaine"},
+        {id: 'mensuel', label: "Mois"},
+        {id: 'annuel', label: "Année"}
+    ];
+
+    // Génération du HTML des colonnes
+    const grid = document.getElementById('grid');
+    types.forEach(t => {
+        grid.innerHTML += `
+            <div class="column" id="col-${t.id}">
+                <div class="column-header">
+                    <div class="column-title">${t.label}</div>
+                    <span class="timer" id="timer-${t.id}">00:00:00</span>
+                    <div class="progress-container"><div class="progress-bar"></div></div>
+                    <span class="perc">0%</span>
+                </div>
+                <div class="category-selector" id="cats-${t.id}">
+                    <div class="cat-dot dot-sport active" onclick="selectCat('${t.id}', 'sport')">🏃</div>
+                    <div class="cat-dot dot-travail" onclick="selectCat('${t.id}', 'travail')">💼</div>
+                    <div class="cat-dot dot-perso" onclick="selectCat('${t.id}', 'perso')">🏠</div>
+                    <div class="cat-dot dot-finance" onclick="selectCat('${t.id}', 'finance')">💰</div>
+                    <div class="cat-dot dot-autre" onclick="selectCat('${t.id}', 'autre')">📍</div>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="in-${t.id}" placeholder="Objectif..." onkeypress="if(event.key==='Enter')addTask('${t.id}')">
+                    <button class="add-btn" onclick="addTask('${t.id}')">+</button>
+                </div>
+                <ul id="list-${t.id}"></ul>
+            </div>
+        `;
+    });
+
+    function selectCat(type, cat) {
+        selectedCats[type] = cat;
         const container = document.getElementById(`cats-${type}`);
-        container.querySelectorAll('.cat-dot').forEach(dot => dot.classList.remove('active'));
-        container.querySelector(`.dot-${catName}`).classList.add('active');
+        container.querySelectorAll('.cat-dot').forEach(d => d.classList.remove('active'));
+        container.querySelector(`.dot-${cat}`).classList.add('active');
     }
 
     function addTask(type) {
         const input = document.getElementById(`in-${type}`);
-        const cat = selectedCats[type];
         if (input.value.trim() === '') return;
-        
-        allData[type].push({ 
-            id: Date.now(), 
-            text: input.value, 
-            category: cat,
-            completed: false 
-        });
+        allData[type].push({ id: Date.now(), text: input.value, category: selectedCats[type], completed: false });
         input.value = '';
         updateUI();
     }
@@ -244,20 +162,54 @@
         const overlay = document.getElementById('bravoOverlay');
         overlay.style.display = 'flex';
         confetti({ particleCount: 150, spread: 70, colors: ['#ff3c3c', '#ffffff'] });
-        setTimeout(() => overlay.style.display = 'none', 900);
+        setTimeout(() => overlay.style.display = 'none', 800);
+    }
+
+    // --- MISE À JOUR HEATMAP ---
+    function updateHeatmap() {
+        const heatmap = document.getElementById('heatmap');
+        heatmap.innerHTML = '';
+        const today = new Date();
+        
+        // Calcul du score du jour actuel
+        let totalTasks = 0, completedTasks = 0;
+        Object.values(allData).forEach(arr => {
+            totalTasks += arr.length;
+            completedTasks += arr.filter(t => t.completed).length;
+        });
+        const todayScore = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+        
+        const dateKey = today.toISOString().split('T')[0];
+        historyData[dateKey] = todayScore;
+        localStorage.setItem('v5_history_data', JSON.stringify(historyData));
+
+        // Générer les 30 derniers jours
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(today.getDate() - i);
+            const key = d.toISOString().split('T')[0];
+            const score = historyData[key] || 0;
+            
+            const square = document.createElement('div');
+            square.className = 'day-square';
+            // Couleur : du rouge sombre (20%) au rouge vif (100%)
+            if (score > 0) {
+                square.style.background = `hsl(0, 100%, ${Math.max(15, score/2)}%)`;
+                square.style.boxShadow = `0 0 5px hsl(0, 100%, ${score/2}%, 0.5)`;
+            }
+            square.setAttribute('data-info', `${key} : ${score}% réussi`);
+            heatmap.appendChild(square);
+        }
     }
 
     function updateTimers() {
         const now = new Date();
         const endDay = new Date().setHours(23,59,59);
         document.getElementById('timer-journalier').innerText = format(endDay - now);
-
         const endSun = new Date(); endSun.setDate(now.getDate() + (7 - now.getDay()) % 7); endSun.setHours(23,59,59);
         document.getElementById('timer-hebdomadaire').innerText = format(endSun - now, true);
-
         const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
         document.getElementById('timer-mensuel').innerText = format(endMonth - now, true);
-
         const endYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
         document.getElementById('timer-annuel').innerText = format(endYear - now, true);
     }
@@ -268,33 +220,29 @@
     }
 
     function updateUI() {
-        ['journalier', 'hebdomadaire', 'mensuel', 'annuel'].forEach(type => {
-            const list = document.getElementById(`list-${type}`);
+        types.forEach(t => {
+            const list = document.getElementById(`list-${t.id}`);
             list.innerHTML = '';
-            const tasks = allData[type];
-
-            tasks.forEach(t => {
+            const tasks = allData[t.id];
+            tasks.forEach(task => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <span class="badge badge-${t.category}">${t.category}</span>
+                    <span class="badge badge-${task.category}">${task.category}</span>
                     <div class="task-header">
-                        <span class="task-text ${t.completed ? 'completed' : ''}" onclick="toggleTask('${type}', ${t.id})">
-                             ${t.text}
-                        </span>
-                        <button class="delete-btn" onclick="deleteTask('${type}', ${t.id})">×</button>
+                        <span class="task-text ${task.completed ? 'completed' : ''}" onclick="toggleTask('${t.id}', ${task.id})">${task.text}</span>
+                        <button class="delete-btn" onclick="deleteTask('${t.id}', ${task.id})">×</button>
                     </div>
                 `;
                 list.appendChild(li);
             });
-
-            const percent = tasks.length === 0 ? 0 : Math.round((tasks.filter(t=>t.completed).length / tasks.length)*100);
-            const col = document.getElementById(`col-${type}`);
-            const bar = col.querySelector('.progress-bar');
-            bar.style.width = percent + '%';
-            bar.style.backgroundColor = `hsl(0, 100%, ${30+(percent*0.4)}%)`;
+            const percent = tasks.length === 0 ? 0 : Math.round((tasks.filter(tk=>tk.completed).length / tasks.length)*100);
+            const col = document.getElementById(`col-${t.id}`);
+            col.querySelector('.progress-bar').style.width = percent + '%';
+            col.querySelector('.progress-bar').style.backgroundColor = `hsl(0, 100%, ${30+(percent*0.4)}%)`;
             col.querySelector('.perc').innerText = percent + '%';
         });
-        localStorage.setItem('v4_performance_data', JSON.stringify(allData));
+        localStorage.setItem('v5_performance_data', JSON.stringify(allData));
+        updateHeatmap();
     }
 
     setInterval(updateTimers, 1000);
