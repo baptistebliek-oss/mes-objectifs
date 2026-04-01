@@ -3,122 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Dashboard Performance Pro</title>
+    <title>Mon Dashboard Performance Elite</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-color: #0a0a0a;
-            --card-bg: #161616;
+            --bg-color: #080808;
+            --card-bg: #121212;
             --text-main: #ffffff;
-            --text-dim: #888888;
+            --text-dim: #666;
             --accent-red: #ff3c3c;
             /* Couleurs des catégories */
             --cat-sport: #4CAF50;
-            --cat-work: #2196F3;
+            --cat-travail: #2196F3;
             --cat-perso: #FFEB3B;
             --cat-finance: #9C27B0;
+            --cat-autre: #555;
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        h1 { text-align: center; color: var(--accent-red); font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+        h1 { text-align: center; color: var(--accent-red); font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin: 10px 0; }
 
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
+            gap: 25px;
+            width: 100%;
+            max-width: 1400px;
         }
 
         .column {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
-            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #1a1a1a;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .column-header { text-align: center; margin-bottom: 10px; }
-        .column-title { font-size: 1.1rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; }
-        .timer { font-family: monospace; font-size: 0.8rem; color: var(--text-dim); }
+        .column-header { text-align: center; margin-bottom: 15px; }
+        .column-title { font-size: 1.2rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; margin-bottom: 5px; }
+        .timer { font-family: 'Courier New', monospace; font-size: 0.85rem; color: var(--text-dim); }
 
         /* Progression */
-        .progress-container { background: #222; height: 8px; border-radius: 4px; margin: 10px 0; overflow: hidden; }
-        .progress-bar { height: 100%; width: 0%; transition: width 0.6s ease; }
+        .progress-container { background: #1a1a1a; height: 6px; border-radius: 10px; margin: 12px 0; overflow: hidden; border: 1px solid #222; }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        .perc { font-size: 0.8rem; font-weight: bold; }
 
-        /* Inputs avec Catégories */
-        .input-area { background: #111; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
-        .input-group { display: flex; gap: 5px; margin-top: 5px; }
-        
-        select, input { 
-            background: #000; border: 1px solid #333; color: white; 
-            padding: 8px; border-radius: 4px; outline: none;
+        /* --- NOUVEAU SELECTEUR DE CATÉGORIES --- */
+        .category-selector {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 5px;
+            background: #000;
+            border-radius: 10px;
         }
-        select { font-size: 0.8rem; cursor: pointer; }
-        input { flex: 1; }
-
-        .add-btn { 
-            background: var(--accent-red); border: none; color: white; 
-            font-weight: bold; cursor: pointer; border-radius: 4px; padding: 0 12px;
+        .cat-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            opacity: 0.4;
         }
+        .cat-dot:hover { opacity: 1; transform: scale(1.1); }
+        .cat-dot.active { opacity: 1; border-color: white; transform: scale(1.2); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
 
-        /* Listes et Badges */
-        ul { list-style: none; padding: 0; }
+        .dot-sport { background: var(--cat-sport); }
+        .dot-travail { background: var(--cat-travail); }
+        .dot-perso { background: var(--cat-perso); }
+        .dot-finance { background: var(--cat-finance); }
+        .dot-autre { background: var(--cat-autre); }
+
+        /* Inputs */
+        .input-group { display: flex; gap: 8px; }
+        input { 
+            flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; 
+            padding: 12px; border-radius: 8px; outline: none; transition: border 0.3s;
+        }
+        input:focus { border-color: var(--accent-red); }
+        .add-btn { background: var(--accent-red); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; padding: 0 18px; }
+
+        /* Listes */
+        ul { list-style: none; padding: 0; margin-top: 20px; }
         li {
-            background: #1f1f1f;
-            margin-bottom: 8px;
-            padding: 10px;
-            border-radius: 6px;
+            background: #181818;
+            margin-bottom: 12px;
+            padding: 14px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             border-left: 4px solid var(--accent-red);
+            transition: transform 0.2s;
         }
-        .task-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        li:hover { transform: translateX(5px); background: #1c1c1c; }
         
         .badge {
-            font-size: 0.65rem;
-            padding: 2px 6px;
-            border-radius: 4px;
+            font-size: 0.6rem;
+            padding: 3px 8px;
+            border-radius: 5px;
             text-transform: uppercase;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 900;
+            margin-bottom: 8px;
             width: fit-content;
         }
-        
-        /* Couleurs badges */
-        .badge-sport { background: var(--cat-sport); color: black; }
-        .badge-travail { background: var(--cat-work); color: white; }
-        .badge-perso { background: var(--cat-perso); color: black; }
-        .badge-finance { background: var(--cat-finance); color: white; }
-        .badge-autre { background: #555; color: white; }
+        .badge-sport { background: var(--cat-sport); color: #000; }
+        .badge-travail { background: var(--cat-travail); color: #fff; }
+        .badge-perso { background: var(--cat-perso); color: #000; }
+        .badge-finance { background: var(--cat-finance); color: #fff; }
+        .badge-autre { background: var(--cat-autre); color: #fff; }
 
-        .task-text { cursor: pointer; flex-grow: 1; font-size: 0.9rem; }
-        .completed { text-decoration: line-through; color: #555; opacity: 0.6; }
-        .delete-btn { color: #444; cursor: pointer; background: none; border: none; font-size: 1rem; }
-        .delete-btn:hover { color: red; }
+        .task-header { display: flex; justify-content: space-between; align-items: center; }
+        .task-text { cursor: pointer; flex-grow: 1; font-size: 0.95rem; font-weight: 500; }
+        .completed { text-decoration: line-through; color: #444; opacity: 0.5; }
+        .delete-btn { color: #333; cursor: pointer; background: none; border: none; font-size: 1.2rem; margin-left: 10px; }
+        .delete-btn:hover { color: var(--accent-red); }
 
-        /* Agenda */
-        .calendar-box { text-align: center; margin-bottom: 20px; padding: 10px; background: #111; border: 1px solid #222; border-radius: 8px; }
-        .calendar-link { color: var(--accent-red); text-decoration: none; font-weight: bold; }
+        /* Agenda link */
+        .calendar-box { margin-bottom: 30px; }
+        .calendar-link { color: var(--accent-red); text-decoration: none; font-weight: bold; font-size: 0.9rem; letter-spacing: 1px; border: 1px solid #222; padding: 10px 20px; border-radius: 30px; transition: all 0.3s; }
+        .calendar-link:hover { background: var(--accent-red); color: black; }
 
-        #bravoOverlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 100; background: rgba(0,0,0,0.9); }
-        #bravoOverlay h2 { font-size: 4rem; color: var(--accent-red); }
+        #bravoOverlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 100; background: rgba(0,0,0,0.95); }
+        #bravoOverlay h2 { font-size: 6rem; color: var(--accent-red); font-weight: 900; }
     </style>
 </head>
 <body>
 
-<div id="bravoOverlay"><h2>BAM ! +1</h2></div>
+<div id="bravoOverlay"><h2>TERMINÉ</h2></div>
 
-<h1>DASHBOARD PERFORMANCE</h1>
+<h1>PERFORMANCE DASHBOARD</h1>
 
 <div class="calendar-box">
-    📅 <a href="https://calendar.google.com" target="_blank" class="calendar-link">MON AGENDA GOOGLE</a>
+    <a href="https://calendar.google.com" target="_blank" class="calendar-link">📅 CONSULTER L'AGENDA GOOGLE</a>
 </div>
 
 <div class="dashboard-grid">
@@ -137,20 +171,20 @@
                         <div class="column-title">${t.label}</div>
                         <span class="timer" id="timer-${t.id}">00:00:00</span>
                         <div class="progress-container"><div class="progress-bar"></div></div>
-                        <small class="perc">0%</small>
+                        <span class="perc">0%</span>
                     </div>
-                    <div class="input-area">
-                        <select id="cat-${t.id}">
-                            <option value="autre">Catégorie...</option>
-                            <option value="sport">🏃 Sport</option>
-                            <option value="travail">💼 Travail</option>
-                            <option value="perso">🏠 Perso</option>
-                            <option value="finance">💰 Finance</option>
-                        </select>
-                        <div class="input-group">
-                            <input type="text" id="in-${t.id}" placeholder="Objectif..." onkeypress="if(event.key==='Enter')addTask('${t.id}')">
-                            <button class="add-btn" onclick="addTask('${t.id}')">+</button>
-                        </div>
+                    
+                    <div class="category-selector" id="cats-${t.id}">
+                        <div class="cat-dot dot-sport active" onclick="selectCat('${t.id}', 'sport')" title="Sport">🏃</div>
+                        <div class="cat-dot dot-travail" onclick="selectCat('${t.id}', 'travail')" title="Travail">💼</div>
+                        <div class="cat-dot dot-perso" onclick="selectCat('${t.id}', 'perso')" title="Perso">🏠</div>
+                        <div class="cat-dot dot-finance" onclick="selectCat('${t.id}', 'finance')" title="Finance">💰</div>
+                        <div class="cat-dot dot-autre" onclick="selectCat('${t.id}', 'autre')" title="Autre">📍</div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="in-${t.id}" placeholder="Ajouter un objectif..." onkeypress="if(event.key==='Enter')addTask('${t.id}')">
+                        <button class="add-btn" onclick="addTask('${t.id}')">+</button>
                     </div>
                     <ul id="list-${t.id}"></ul>
                 </div>
@@ -160,13 +194,24 @@
 </div>
 
 <script>
-    let allData = JSON.parse(localStorage.getItem('v3_performance_data')) || { 
+    let allData = JSON.parse(localStorage.getItem('v4_performance_data')) || { 
         journalier: [], hebdomadaire: [], mensuel: [], annuel: [] 
     };
 
+    // Stockage de la catégorie sélectionnée par colonne (par défaut sport)
+    let selectedCats = { journalier: 'sport', hebdomadaire: 'sport', mensuel: 'sport', annuel: 'sport' };
+
+    function selectCat(type, catName) {
+        selectedCats[type] = catName;
+        // Mise à jour visuelle des points
+        const container = document.getElementById(`cats-${type}`);
+        container.querySelectorAll('.cat-dot').forEach(dot => dot.classList.remove('active'));
+        container.querySelector(`.dot-${catName}`).classList.add('active');
+    }
+
     function addTask(type) {
         const input = document.getElementById(`in-${type}`);
-        const cat = document.getElementById(`cat-${type}`).value;
+        const cat = selectedCats[type];
         if (input.value.trim() === '') return;
         
         allData[type].push({ 
@@ -198,8 +243,8 @@
     function showBravo() {
         const overlay = document.getElementById('bravoOverlay');
         overlay.style.display = 'flex';
-        confetti({ particleCount: 100, spread: 70, colors: ['#ff0000', '#ffffff'] });
-        setTimeout(() => overlay.style.display = 'none', 800);
+        confetti({ particleCount: 150, spread: 70, colors: ['#ff3c3c', '#ffffff'] });
+        setTimeout(() => overlay.style.display = 'none', 900);
     }
 
     function updateTimers() {
@@ -244,11 +289,12 @@
 
             const percent = tasks.length === 0 ? 0 : Math.round((tasks.filter(t=>t.completed).length / tasks.length)*100);
             const col = document.getElementById(`col-${type}`);
-            col.querySelector('.progress-bar').style.width = percent + '%';
-            col.querySelector('.progress-bar').style.backgroundColor = `hsl(0, 100%, ${30+(percent*0.4)}%)`;
+            const bar = col.querySelector('.progress-bar');
+            bar.style.width = percent + '%';
+            bar.style.backgroundColor = `hsl(0, 100%, ${30+(percent*0.4)}%)`;
             col.querySelector('.perc').innerText = percent + '%';
         });
-        localStorage.setItem('v3_performance_data', JSON.stringify(allData));
+        localStorage.setItem('v4_performance_data', JSON.stringify(allData));
     }
 
     setInterval(updateTimers, 1000);
