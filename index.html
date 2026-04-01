@@ -9,20 +9,20 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
 :root {
-  --bg:       #0d0d0f;
-  --s1:       #141416;
-  --s2:       #1a1a1d;
-  --s3:       #202024;
-  --border:   rgba(255,255,255,0.07);
-  --border2:  rgba(255,255,255,0.04);
-  --text:     #f0f0f2;
-  --text2:    #8a8a96;
-  --text3:    #46464f;
-  --violet:   #7c6af7;
-  --blue:     #5b9cf6;
-  --green:    #34d399;
-  --amber:    #fbbf24;
-  --red:      #f87171;
+  --bg:        #0d0d0f;
+  --s1:        #141416;
+  --s2:        #1a1a1d;
+  --s3:        #202024;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.04);
+  --text:      #f0f0f2;
+  --text2:     #8a8a96;
+  --text3:     #46464f;
+  --violet:    #7c6af7;
+  --blue:      #5b9cf6;
+  --green:     #34d399;
+  --amber:     #fbbf24;
+  --red:       #f87171;
   --font: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -106,15 +106,18 @@ body {
 .prog-bar   { height: 100%; border-radius: 99px; opacity: .65; transition: width .7s cubic-bezier(.4,0,.2,1); }
 
 /* ── TASK LIST ── */
-.task-list { list-style: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.task-list { list-style: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 50px; }
 
 .task-card {
   background: var(--s2);
   border: 1px solid var(--border2);
   border-radius: 14px;
   padding: 12px 13px;
-  transition: background .18s, border-color .18s, opacity .2s, filter .2s;
+  transition: background .18s, border-color .18s, opacity .2s, filter .2s, transform .1s;
+  cursor: grab;
 }
+.task-card:active { cursor: grabbing; }
+.task-card.dragging { opacity: 0.4; transform: scale(0.98); border: 1px dashed var(--violet); }
 .task-card:hover { background: var(--s3); border-color: var(--border); }
 .task-card.locked { opacity: .25; filter: grayscale(1); pointer-events: none; }
 .task-card.done { background: rgba(52,211,153,.04); border-color: rgba(52,211,153,.13); }
@@ -122,6 +125,7 @@ body {
 .task-top {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 9px;
+  pointer-events: none; /* Laisse le drag se faire sur toute la carte */
 }
 .recur-pill {
   font-size: .58rem; font-weight: 700; letter-spacing: .7px;
@@ -134,6 +138,7 @@ body {
   background: none; border: none; color: var(--text3);
   cursor: pointer; border-radius: 6px;
   transition: background .15s, color .15s;
+  pointer-events: auto; /* Réactive le clic pour supprimer */
 }
 .del-btn:hover { background: rgba(248,113,113,.1); color: var(--red); }
 
@@ -167,14 +172,10 @@ body {
 }
 .sub-prog-fill { height: 100%; transition: width .4s ease; }
 
-/* ── EMPTY ── */
-.empty {
-  text-align: center; padding: 30px 16px;
-  color: var(--text3); font-size: .8rem;
-}
+/* ── MODAL & AUTRES ── */
+.empty { text-align: center; padding: 30px 16px; color: var(--text3); font-size: .8rem; }
 .empty-icon { font-size: 1.6rem; margin-bottom: 6px; opacity: .35; }
 
-/* ── FAB ── */
 .fab {
   position: fixed; bottom: 28px; right: 28px;
   width: 54px; height: 54px;
@@ -188,7 +189,6 @@ body {
 .fab:hover { transform: scale(1.06) translateY(-2px); box-shadow: 0 14px 36px rgba(124,106,247,.45); }
 .fab:active { transform: scale(.96); }
 
-/* ── OVERLAY ── */
 .overlay {
   position: fixed; inset: 0;
   background: rgba(5,5,8,.82);
@@ -209,89 +209,49 @@ body {
   from { opacity:0; transform: translateY(18px); }
   to   { opacity:1; transform: translateY(0); }
 }
-.modal-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 22px;
-}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
 .modal-title { font-size: 1rem; font-weight: 800; color: var(--text); }
 .modal-close {
-  width: 30px; height: 30px;
-  background: var(--s2); border: 1px solid var(--border2);
+  width: 30px; height: 30px; background: var(--s2); border: 1px solid var(--border2);
   border-radius: 8px; color: var(--text2); font-size: 18px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background .15s, color .15s;
 }
-.modal-close:hover { background: var(--s3); color: var(--text); }
 
 .form-group { margin-bottom: 15px; }
-.form-label {
-  display: block; font-size: .68rem; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 6px;
-}
+.form-label { display: block; font-size: .68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
 input[type="text"], input[type="date"], input[type="number"], select {
   width: 100%; background: var(--s2); border: 1px solid var(--border);
   color: var(--text); padding: 10px 13px; border-radius: 11px;
-  font-family: var(--font); font-size: .875rem; font-weight: 500;
-  outline: none; transition: border-color .2s, background .2s;
-  -webkit-appearance: none;
+  font-family: var(--font); font-size: .875rem; font-weight: 500; outline: none;
 }
-input:focus, select:focus { border-color: var(--violet); background: var(--s3); }
-select option { background: #1a1a1d; }
 
 .toggle-row {
   display: flex; align-items: center; gap: 10px;
   background: var(--s2); border: 1px solid var(--border);
   border-radius: 11px; padding: 10px 13px; cursor: pointer;
   font-size: .875rem; font-weight: 500; color: var(--text2);
-  transition: border-color .2s;
 }
-.toggle-row input[type="checkbox"] { accent-color: var(--violet); width: 15px; height: 15px; flex-shrink: 0; }
 
 .days-row { display: flex; gap: 5px; margin-top: 10px; }
 .day-btn {
-  flex: 1; padding: 8px 0;
-  background: var(--s2); border: 1px solid var(--border);
-  border-radius: 9px; color: var(--text3);
-  font-size: .7rem; font-weight: 600; cursor: pointer;
-  text-align: center; transition: all .15s; font-family: var(--font);
+  flex: 1; padding: 8px 0; background: var(--s2); border: 1px solid var(--border);
+  border-radius: 9px; color: var(--text3); font-size: .7rem; font-weight: 600; cursor: pointer;
+  text-align: center; transition: all .15s;
 }
 .day-btn.on { background: var(--violet); color: #fff; border-color: var(--violet); }
 
-.parent-list {
-  background: var(--s2); border: 1px solid var(--border);
-  border-radius: 11px; padding: 8px; margin-top: 8px;
-}
-.parent-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 5px; font-size: .82rem; color: var(--text2);
-  border-bottom: 1px solid var(--border2);
-}
-.parent-row:last-child { border-bottom: none; }
-.parent-row input[type="checkbox"] { accent-color: var(--violet); flex-shrink: 0; }
-.parent-row input[type="number"] { width: 54px; padding: 5px 8px; margin: 0; text-align: center; }
-.parent-row span { flex: 1; }
+.parent-list { background: var(--s2); border: 1px solid var(--border); border-radius: 11px; padding: 8px; margin-top: 8px; }
+.parent-row { display: flex; align-items: center; gap: 8px; padding: 7px 5px; font-size: .82rem; color: var(--text2); border-bottom: 1px solid var(--border2); }
 
 .btn-save {
-  width: 100%;
-  background: linear-gradient(135deg, var(--violet), var(--blue));
-  color: #fff; border: none; padding: 13px;
-  border-radius: 12px; font-family: var(--font);
-  font-size: .9rem; font-weight: 700; cursor: pointer;
-  box-shadow: 0 4px 20px rgba(124,106,247,.28);
-  transition: opacity .15s, transform .12s;
+  width: 100%; background: linear-gradient(135deg, var(--violet), var(--blue));
+  color: #fff; border: none; padding: 13px; border-radius: 12px; font-family: var(--font);
+  font-size: .9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 20px rgba(124,106,247,.28);
 }
-.btn-save:hover { opacity: .9; transform: translateY(-1px); }
-.btn-cancel {
-  width: 100%; background: none; border: none;
-  color: var(--text3); padding: 10px; font-family: var(--font);
-  font-size: .82rem; cursor: pointer; margin-top: 6px; transition: color .2s;
-}
-.btn-cancel:hover { color: var(--text2); }
+.btn-cancel { width: 100%; background: none; border: none; color: var(--text3); padding: 10px; cursor: pointer; margin-top: 6px; }
 
 .hidden { display: none !important; }
 
-/* ── BRAVO ── */
 #bravo {
   position: fixed; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -299,11 +259,11 @@ select option { background: #1a1a1d; }
 }
 #bravo.show { animation: bravoAnim 1.8s ease forwards; }
 @keyframes bravoAnim {
-  0%   { opacity:0; transform:scale(.65); }
-  14%  { opacity:1; transform:scale(1.06); }
-  30%  { transform:scale(.98); }
-  45%  { transform:scale(1.02); }
-  68%  { opacity:1; transform:scale(1); }
+  0%    { opacity:0; transform:scale(.65); }
+  14%   { opacity:1; transform:scale(1.06); }
+  30%   { transform:scale(.98); }
+  45%   { transform:scale(1.02); }
+  68%   { opacity:1; transform:scale(1); }
   100% { opacity:0; transform:scale(1.1); }
 }
 .bravo-word {
@@ -312,10 +272,7 @@ select option { background: #1a1a1d; }
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   filter: drop-shadow(0 0 50px rgba(124,106,247,.6)); line-height: 1;
 }
-.bravo-sub {
-  font-size: .88rem; font-weight: 600; letter-spacing: 5px;
-  text-transform: uppercase; color: rgba(255,255,255,.22); margin-top: 10px;
-}
+.bravo-sub { font-size: .88rem; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,.22); margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -343,7 +300,6 @@ select option { background: #1a1a1d; }
   </svg>
 </button>
 
-<!-- MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="modal-header">
@@ -468,6 +424,61 @@ function isLocked(t) {
   return !t.completed && t.requirements?.some(r => (counts[r.parentId]||0) < r.quota);
 }
 
+// ── FONCTIONS DRAG & DROP ──
+function initDragAndDrop() {
+  const lists = document.querySelectorAll('.task-list');
+  lists.forEach(list => {
+    list.addEventListener('dragover', e => {
+      e.preventDefault();
+      const afterElement = getDragAfterElement(list, e.clientY);
+      const dragging = document.querySelector('.dragging');
+      if (afterElement == null) {
+        list.appendChild(dragging);
+      } else {
+        list.insertBefore(dragging, afterElement);
+      }
+    });
+
+    list.addEventListener('drop', e => {
+      e.preventDefault();
+      reorderTasks();
+    });
+  });
+}
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.task-card:not(.dragging)')];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function reorderTasks() {
+  const newTasks = [];
+  // On récupère toutes les cartes dans l'ordre du DOM pour reconstruire le tableau
+  document.querySelectorAll('.task-card').forEach(el => {
+    const id = el.dataset.id;
+    const task = tasks.find(t => t.id === id);
+    if (task) newTasks.push(task);
+  });
+  
+  // On ajoute les tâches qui ne sont pas visibles actuellement (autres colonnes/filtres)
+  tasks.forEach(t => {
+    if (!newTasks.find(nt => nt.id === t.id)) {
+      newTasks.push(t);
+    }
+  });
+
+  tasks = newTasks;
+  save();
+}
+
 function render() {
   const now = new Date();
   const tod = now.toISOString().split('T')[0];
@@ -487,20 +498,23 @@ function render() {
     const total = vis.length;
     const pct   = total ? Math.round(done/total*100) : 0;
 
-    // SVG ring
     const R = 16, C = 2*Math.PI*R;
     const offset = C - (pct/100)*C;
 
     const items = total === 0
-      ? `<div class="empty"><div class="empty-icon">✦</div>Aucun objectif pour cette période</div>`
+      ? `<div class="empty"><div class="empty-icon">✦</div>Aucun objectif</div>`
       : vis.map(t => {
           const prog   = parentProgress(t);
           const locked = isLocked(t);
           return `
-            <li class="task-card${t.completed?' done':''}${locked?' locked':''}">
+            <li class="task-card${t.completed?' done':''}${locked?' locked':''}" 
+                draggable="true" 
+                data-id="${t.id}"
+                ondragstart="this.classList.add('dragging')"
+                ondragend="this.classList.remove('dragging')">
               <div class="task-top">
                 <span class="recur-pill">${t.recurrence||'Unique'}</span>
-                <button class="del-btn" onclick="deleteTask('${t.id}')" title="Supprimer">
+                <button class="del-btn" onclick="deleteTask('${t.id}')">
                   <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
                     <path d="M1 1l7 7M8 1L1 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                   </svg>
@@ -543,10 +557,11 @@ function render() {
             <div class="prog-bar" style="width:${pct}%;background:${c}"></div>
           </div>
         </div>
-        <ul class="task-list">${items}</ul>
+        <ul class="task-list" data-scope="${col.id}">${items}</ul>
       </div>`);
   });
 
+  initDragAndDrop();
   save();
 }
 
@@ -565,11 +580,6 @@ function celebrate() {
   el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 1900);
   confetti({ particleCount:80, spread:90, origin:{y:.5}, colors:['#7c6af7','#5b9cf6','#34d399','#fbbf24','#fff'] });
-  setTimeout(() => {
-    confetti({ particleCount:45, angle:60,  spread:55, origin:{x:0,y:.65}, colors:['#7c6af7','#fbbf24'] });
-    confetti({ particleCount:45, angle:120, spread:55, origin:{x:1,y:.65}, colors:['#34d399','#5b9cf6'] });
-  }, 200);
-  setTimeout(() => confetti({ particleCount:28, spread:60, origin:{y:.4}, shapes:['star'], colors:['#fbbf24','#7c6af7'] }), 450);
 }
 
 function deleteTask(id) {
@@ -615,9 +625,7 @@ function syncForm() {
   toggle('grpSubmitBtn',   name.length > 0);
 }
 
-function toggle(id, show) {
-  document.getElementById(id).classList.toggle('hidden', !show);
-}
+function toggle(id, show) { document.getElementById(id).classList.toggle('hidden', !show); }
 
 function buildParentList(existing=[]) {
   const editId = document.getElementById('editId').value;
