@@ -317,10 +317,13 @@ select option { background: #1a1a1d; }
   text-transform: uppercase; color: rgba(255,255,255,.22); margin-top: 10px;
 }
 
-/* Keyboard navigation highlight */
-.task-card.keyboard-focused {
-  outline: 2px solid var(--violet);
-  outline-offset: 2px;
+/* Lazy loading indicator */
+.loading-more {
+  text-align: center;
+  padding: 20px;
+  color: var(--text3);
+  font-size: 0.8rem;
+  grid-column: 1 / -1;
 }
 </style>
 </head>
@@ -341,8 +344,9 @@ select option { background: #1a1a1d; }
 
 <main class="main">
   <div class="grid" id="grid"></div>
+  <div class="loading-more hidden" id="loadingMore">Chargement...</div>
 </main>
 
 <button class="fab" onclick="openModal()" title="Nouvel objectif">
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="
+    <path d
