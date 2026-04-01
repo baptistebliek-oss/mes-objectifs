@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Elite v22 - Chronos Intégral</title>
+    <title>Performance Elite v23 - Restauration Parenté</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -46,8 +46,8 @@
         label { font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 8px; }
         input, select { width: 100%; background: #000; border: 1px solid #222; color: white; padding: 12px; border-radius: 10px; box-sizing: border-box; }
         
-        .toggle-container { display: flex; align-items: center; gap: 10px; background: #000; padding: 12px; border-radius: 10px; border: 1px solid #222; cursor: pointer; }
-        .toggle-container input { width: auto; margin-bottom: 0; }
+        .toggle-container { display: flex; align-items: center; gap: 10px; background: #000; padding: 12px; border-radius: 10px; border: 1px solid #222; cursor: pointer; margin-top: 10px;}
+        .toggle-container input { width: auto; margin-bottom: 0; cursor: pointer;}
 
         .parent-selector { background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; margin-top: 10px; }
         .parent-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
@@ -68,7 +68,7 @@
         
         <div class="form-step" id="step-name" style="display:block;">
             <label>Titre de l'objectif</label>
-            <input type="text" id="taskName" placeholder="Ex: Gagner la guerre..." oninput="checkSteps()">
+            <input type="text" id="taskName" placeholder="Titre..." oninput="checkSteps()">
         </div>
 
         <div class="form-step" id="step-scope">
@@ -89,7 +89,7 @@
         <div class="form-step" id="step-dep-toggle">
             <label class="toggle-container">
                 <input type="checkbox" id="hasDeps" onchange="checkSteps()">
-                <span>Ajouter des pré-requis ?</span>
+                <span>Ajouter des liens de parenté ?</span>
             </label>
             <div class="parent-selector" id="parentList" style="display:none;"></div>
         </div>
@@ -97,7 +97,7 @@
         <div class="form-step" id="step-recur">
             <label>Récurrence automatique</label>
             <select id="taskRecur" onchange="checkSteps()">
-                <option value="">Mission Unique</option>
+                <option value="">Unique</option>
                 <option value="Quotidien">Quotidien</option>
                 <option value="Hebdomadaire">Hebdomadaire</option>
                 <option value="Mensuel">Mensuel</option>
@@ -106,7 +106,7 @@
         </div>
 
         <div class="form-step" id="step-submit">
-            <button class="btn-add" onclick="saveTask()">DÉPLOYER L'OBJECTIF</button>
+            <button class="btn-add" onclick="saveTask()">DÉPLOYER</button>
         </div>
 
         <button style="width:100%; background:none; border:none; color:#444; margin-top:15px; cursor:pointer;" onclick="closeModal()">Annuler</button>
@@ -118,8 +118,8 @@
 <button class="fab" onclick="openCreateModal()">+</button>
 
 <script>
-    let allTasks = JSON.parse(localStorage.getItem('v22_tasks')) || [];
-    let totalCounts = JSON.parse(localStorage.getItem('v22_counts')) || {};
+    let allTasks = JSON.parse(localStorage.getItem('v23_tasks')) || [];
+    let totalCounts = JSON.parse(localStorage.getItem('v23_counts')) || {};
     const columns = [
         { id: 'today', label: "Journalier" },
         { id: 'week', label: "Semaine" },
@@ -131,23 +131,27 @@
         const name = document.getElementById('taskName').value.trim();
         const scope = document.getElementById('taskScope').value;
         const hasDeps = document.getElementById('hasDeps').checked;
+        const currentId = document.getElementById('editTaskId').value;
         
+        // Affichage séquentiel
         document.getElementById('step-scope').style.display = name.length > 0 ? 'block' : 'none';
-        
-        // La date ne s'affiche QUE pour Journalier
-        document.getElementById('dateWrapper').style.display = (scope === 'today') ? 'block' : 'none';
+        document.getElementById('dateWrapper').style.display = (scope === 'today' && name.length > 0) ? 'block' : 'none';
 
         if (name.length > 0) {
-            const otherTasks = allTasks.filter(t => t.id !== document.getElementById('editTaskId').value);
+            // On affiche le bouton de dépendance s'il existe d'autres tâches
+            const otherTasks = allTasks.filter(t => t.id !== currentId);
             document.getElementById('step-dep-toggle').style.display = otherTasks.length > 0 ? 'block' : 'none';
+            
+            // On affiche la liste SEULEMENT si la case est cochée
             document.getElementById('parentList').style.display = hasDeps ? 'block' : 'none';
+            
             document.getElementById('step-recur').style.display = 'block';
             document.getElementById('step-submit').style.display = 'block';
         }
     }
 
     function openCreateModal() {
-        document.getElementById('modalTitle').innerText = "NOUVEAU PLAN";
+        document.getElementById('modalTitle').innerText = "NOUVEL OBJECTIF";
         document.getElementById('editTaskId').value = "";
         document.getElementById('taskName').value = "";
         document.getElementById('taskDate').value = "";
@@ -167,7 +171,10 @@
         document.getElementById('taskDate').value = task.date || "";
         document.getElementById('taskScope').value = task.scope || 'today';
         document.getElementById('taskRecur').value = task.recurrence || "";
-        document.getElementById('hasDeps').checked = task.requirements && task.requirements.length > 0;
+        
+        const hasExistingDeps = task.requirements && task.requirements.length > 0;
+        document.getElementById('hasDeps').checked = hasExistingDeps;
+        
         renderParentList(task.requirements || []);
         checkSteps();
         document.getElementById('taskModal').style.display = 'flex';
@@ -177,7 +184,9 @@
         const list = document.getElementById('parentList');
         list.innerHTML = '';
         const currentId = document.getElementById('editTaskId').value;
-        allTasks.filter(t => t.id !== currentId).forEach(t => {
+        const others = allTasks.filter(t => t.id !== currentId);
+        
+        others.forEach(t => {
             const req = existingReqs.find(r => r.parentId === t.id);
             list.innerHTML += `
                 <div class="parent-row">
@@ -198,10 +207,13 @@
         const recur = document.getElementById('taskRecur').value;
         const hasDeps = document.getElementById('hasDeps').checked;
         
-        let reqs = hasDeps ? Array.from(document.querySelectorAll('.parent-row')).filter(r => r.querySelector('.parent-check').checked).map(r => ({
-            parentId: r.querySelector('.parent-check').value,
-            quota: parseInt(r.querySelector('.parent-quota').value) || 1
-        })) : [];
+        let reqs = [];
+        if(hasDeps) {
+            reqs = Array.from(document.querySelectorAll('.parent-row')).filter(r => r.querySelector('.parent-check').checked).map(r => ({
+                parentId: r.querySelector('.parent-check').value,
+                quota: parseInt(r.querySelector('.parent-quota').value) || 1
+            }));
+        }
 
         if (!name) return;
 
@@ -218,7 +230,7 @@
     function toggleTask(id) {
         const task = allTasks.find(t => t.id === id);
         if (task.requirements?.some(req => (totalCounts[req.parentId] || 0) < req.quota) && !task.completed) {
-            alert("Quotas non atteints !"); return;
+            alert("Pré-requis insuffisants !"); return;
         }
         task.completed = !task.completed;
         if(task.completed) {
@@ -244,8 +256,7 @@
         columns.forEach(col => {
             let filtered = allTasks.filter(t => {
                 if (t.scope !== col.id) return false;
-                if (!t.date) return true; // Permanent si pas de date
-                
+                if (!t.date) return true;
                 const tDate = new Date(t.date);
                 if (col.id === 'today') return t.date === todayStr;
                 if (col.id === 'week') return tDate >= startOfWeek && tDate <= endOfWeek;
@@ -262,7 +273,7 @@
                 listHtml += `
                     <li class="task-card ${tk.completed ? 'completed' : ''} ${isLocked && !tk.completed ? 'locked' : ''}">
                         <div style="display:flex; justify-content:space-between; align-items:center">
-                            <span class="badge" style="font-size:0.6rem; color:#555">${tk.recurrence || 'MISSION UNIQUE'}</span>
+                            <span class="badge" style="font-size:0.6rem; color:#555">${tk.recurrence || 'UNIQUE'}</span>
                             <div style="display:flex; align-items:center; gap:8px">
                                 <span class="stat-badge">Σ ${totalCounts[tk.id]||0}</span>
                                 <button onclick="deleteTask('${tk.id}')" style="background:none; border:none; color:#333; cursor:pointer;">×</button>
@@ -272,7 +283,7 @@
                             <div class="check-circle" onclick="toggleTask('${tk.id}')"></div>
                             <span class="task-text" onclick="openEditModal('${tk.id}')">${tk.text}</span>
                         </div>
-                        <div class="date-badge">${tk.date || 'OBJECTIF PERMANENT'}</div>
+                        <div class="date-badge">${tk.date || 'PERMANENT'}</div>
                         ${tk.requirements?.length > 0 ? `<div class="requirement-list">${tk.requirements.map(r => {
                             const p = allTasks.find(at => at.id === r.parentId);
                             return `<div class="req-item"><span>${p?p.text:'?'}</span> <span>${totalCounts[r.parentId]||0}/${r.quota}</span></div>`;
@@ -288,8 +299,8 @@
                 </div>`;
         });
 
-        localStorage.setItem('v22_tasks', JSON.stringify(allTasks));
-        localStorage.setItem('v22_counts', JSON.stringify(totalCounts));
+        localStorage.setItem('v23_tasks', JSON.stringify(allTasks));
+        localStorage.setItem('v23_counts', JSON.stringify(totalCounts));
     }
 
     function deleteTask(id) { if(confirm("Supprimer ?")) { allTasks = allTasks.filter(t => t.id !== id); updateUI(); } }
