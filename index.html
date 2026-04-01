@@ -3,150 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Dashboard Vision</title>
+    <title>Mon Dashboard Performance</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-color: #0f0f0f;
-            --card-bg: #1a1a1a;
+            --bg-color: #0a0a0a;
+            --card-bg: #161616;
             --text-main: #ffffff;
-            --text-dim: #a0a0a0;
-            --accent: #BB86FC;
+            --text-dim: #888888;
+            --accent-red: #ff3c3c; /* Le nouveau rouge */
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
         }
 
-        h1 { text-align: center; color: var(--accent); font-weight: 300; letter-spacing: 2px; }
+        h1 { text-align: center; color: var(--accent-red); font-weight: 800; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
 
         /* Grille principale */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
-        /* Colonnes (Cards) */
+        /* Colonnes */
         .column {
             background: var(--card-bg);
-            border-radius: 15px;
+            border-radius: 12px;
             padding: 20px;
-            border: 1px solid #333;
+            border: 1px solid #222;
             display: flex;
             flex-direction: column;
-            min-height: 400px;
+            transition: transform 0.3s ease;
         }
+        .column:hover { border-color: #444; }
 
-        .column-header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
+        .column-header { text-align: center; margin-bottom: 15px; }
+        .column-title { font-size: 1.1rem; font-weight: bold; text-transform: uppercase; color: var(--accent-red); }
+        
+        /* Chronomètres */
+        .timer { font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; color: var(--text-dim); margin-top: 5px; display: block; }
 
-        .column-title {
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-
-        /* Barre de progression spécifique à chaque colonne */
-        .progress-container {
-            background: #333;
-            height: 6px;
-            border-radius: 3px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            transition: width 0.5s ease, background-color 0.5s ease;
-        }
+        /* Barre de progression */
+        .progress-container { background: #222; height: 8px; border-radius: 4px; margin: 12px 0 5px 0; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .perc { font-weight: bold; font-size: 0.9rem; }
 
         /* Inputs */
-        .input-group {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-        input {
-            flex: 1;
-            background: #121212;
-            border: 1px solid #444;
-            color: white;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        .add-btn {
-            background: var(--accent);
-            border: none;
-            color: black;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-            padding: 0 12px;
-        }
+        .input-group { display: flex; gap: 8px; margin: 15px 0; }
+        input { flex: 1; background: #000; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; outline: none; }
+        input:focus { border-color: var(--accent-red); }
+        .add-btn { background: var(--accent-red); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 6px; padding: 0 15px; transition: opacity 0.2s; }
+        .add-btn:hover { opacity: 0.8; }
 
         /* Listes */
         ul { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
         li {
-            background: #252525;
-            margin-bottom: 8px;
-            padding: 10px;
+            background: #1f1f1f;
+            margin-bottom: 10px;
+            padding: 12px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.9rem;
-            animation: fadeIn 0.3s ease;
+            border-left: 3px solid var(--accent-red);
         }
-        .task-text { cursor: pointer; flex-grow: 1; }
-        .completed { text-decoration: line-through; color: #666; }
-        .delete-btn { color: #ff5555; cursor: pointer; background: none; border: none; font-size: 1.1rem; }
+        .task-text { cursor: pointer; flex-grow: 1; font-size: 0.95rem; }
+        .completed { text-decoration: line-through; color: #555; filter: grayscale(1); }
+        .delete-btn { color: #555; cursor: pointer; background: none; border: none; font-size: 1.2rem; transition: color 0.2s; }
+        .delete-btn:hover { color: #ff5555; }
 
-        /* Agenda Link Section */
+        /* Agenda Link */
         .calendar-box {
-            grid-column: 1 / -1;
-            background: #1e1e1e;
-            padding: 15px;
-            border-radius: 15px;
+            background: #111;
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
-            border: 1px dashed var(--accent);
-            margin-top: 20px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
         }
-        .calendar-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .calendar-link { color: #ff3c3c; text-decoration: none; font-weight: bold; font-size: 0.9rem; }
+        .calendar-link:hover { text-decoration: underline; }
 
         /* Bravo Overlay */
-        #bravoOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; z-index: 100; background: rgba(0,0,0,0.8); }
-        #bravoOverlay h2 { font-size: 5rem; color: gold; text-shadow: 0 0 20px orange; }
+        #bravoOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; z-index: 100; background: rgba(0,0,0,0.9); }
+        #bravoOverlay h2 { font-size: 5rem; color: var(--accent-red); text-shadow: 0 0 30px rgba(255, 60, 60, 0.5); }
     </style>
 </head>
 <body>
 
-<div id="bravoOverlay"><h2>BRAVO !</h2></div>
+<div id="bravoOverlay"><h2>MISSION ACCOMPLIE</h2></div>
 
-<h1>MY VISION DASHBOARD</h1>
+<h1>DASHBOARD DE PERFORMANCE</h1>
 
 <div class="calendar-box">
-    📅 <strong>Agenda :</strong> <a href="https://calendar.google.com" target="_blank" class="calendar-link">Ouvrir mon Google Calendar en un clic</a>
+    📅 <a href="https://calendar.google.com" target="_blank" class="calendar-link">CONSULTER MON AGENDA GOOGLE</a>
 </div>
 
 <div class="dashboard-grid">
     <div class="column" id="col-journalier">
         <div class="column-header">
             <div class="column-title">Aujourd'hui</div>
+            <span class="timer" id="timer-journalier">00:00:00</span>
             <div class="progress-container"><div class="progress-bar"></div></div>
             <small class="perc">0%</small>
         </div>
@@ -159,7 +123,8 @@
 
     <div class="column" id="col-hebdomadaire">
         <div class="column-header">
-            <div class="column-title">Cette Semaine</div>
+            <div class="column-title">Semaine</div>
+            <span class="timer" id="timer-hebdomadaire">0j 00:00:00</span>
             <div class="progress-container"><div class="progress-bar"></div></div>
             <small class="perc">0%</small>
         </div>
@@ -172,12 +137,13 @@
 
     <div class="column" id="col-mensuel">
         <div class="column-header">
-            <div class="column-title">Ce Mois</div>
+            <div class="column-title">Mois</div>
+            <span class="timer" id="timer-mensuel">0j 00:00:00</span>
             <div class="progress-container"><div class="progress-bar"></div></div>
             <small class="perc">0%</small>
         </div>
         <div class="input-group">
-            <input type="text" placeholder="Objectif mensuel..." onkeypress="handleEnter(event, 'mensuel')">
+            <input type="text" placeholder="Objectif mois..." onkeypress="handleEnter(event, 'mensuel')">
             <button class="add-btn" onclick="addTask('mensuel')">+</button>
         </div>
         <ul id="list-mensuel"></ul>
@@ -185,12 +151,13 @@
 
     <div class="column" id="col-annuel">
         <div class="column-header">
-            <div class="column-title">Cette Année</div>
+            <div class="column-title">Année</div>
+            <span class="timer" id="timer-annuel">0j 00:00:00</span>
             <div class="progress-container"><div class="progress-bar"></div></div>
             <small class="perc">0%</small>
         </div>
         <div class="input-group">
-            <input type="text" placeholder="Grand rêve..." onkeypress="handleEnter(event, 'annuel')">
+            <input type="text" placeholder="Grand objectif..." onkeypress="handleEnter(event, 'annuel')">
             <button class="add-btn" onclick="addTask('annuel')">+</button>
         </div>
         <ul id="list-annuel"></ul>
@@ -198,7 +165,7 @@
 </div>
 
 <script>
-    let allData = JSON.parse(localStorage.getItem('multiColumnGoals')) || { 
+    let allData = JSON.parse(localStorage.getItem('redPerformanceDashboard')) || { 
         journalier: [], hebdomadaire: [], mensuel: [], annuel: [] 
     };
 
@@ -207,7 +174,6 @@
     function addTask(type) {
         const input = document.querySelector(`#col-${type} input`);
         if (input.value.trim() === '') return;
-        
         allData[type].push({ id: Date.now(), text: input.value, completed: false });
         input.value = '';
         updateUI();
@@ -232,28 +198,64 @@
     function showBravo() {
         const overlay = document.getElementById('bravoOverlay');
         overlay.style.display = 'flex';
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        setTimeout(() => overlay.style.display = 'none', 1000);
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#ff0000', '#ffffff', '#880000'] });
+        setTimeout(() => overlay.style.display = 'none', 900);
+    }
+
+    function updateTimers() {
+        const now = new Date();
+        
+        // Jour
+        const dayEnd = new Date().setHours(23, 59, 59);
+        document.getElementById('timer-journalier').innerText = formatTime(dayEnd - now);
+
+        // Semaine (jusqu'à dimanche soir)
+        const nextSun = new Date();
+        nextSun.setDate(now.getDate() + (7 - now.getDay()) % 7);
+        nextSun.setHours(23,59,59);
+        document.getElementById('timer-hebdomadaire').innerText = formatTime(nextSun - now, true);
+
+        // Mois
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        document.getElementById('timer-mensuel').innerText = formatTime(monthEnd - now, true);
+
+        // Année
+        const yearEnd = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+        document.getElementById('timer-annuel').innerText = formatTime(yearEnd - now, true);
+    }
+
+    function formatTime(ms, includeDays = false) {
+        if (ms < 0) return "Terminé";
+        let s = Math.floor(ms / 1000);
+        let m = Math.floor(s / 60);
+        let h = Math.floor(m / 60);
+        let d = Math.floor(h / 24);
+        
+        h %= 24; m %= 60; s %= 60;
+        
+        return (includeDays ? d + "j " : "") + 
+               h.toString().padStart(2, '0') + ":" + 
+               m.toString().padStart(2, '0') + ":" + 
+               s.toString().padStart(2, '0');
     }
 
     function updateUI() {
         ['journalier', 'hebdomadaire', 'mensuel', 'annuel'].forEach(type => {
             const list = document.getElementById(`list-${type}`);
-            const tasks = allData[type];
             list.innerHTML = '';
+            const tasks = allData[type];
 
             tasks.forEach(t => {
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <span class="task-text ${t.completed ? 'completed' : ''}" onclick="toggleTask('${type}', ${t.id})">
-                        ${t.completed ? '✅ ' : '⭕ '} ${t.text}
+                        ${t.completed ? '✔️' : '🚩'} ${t.text}
                     </span>
                     <button class="delete-btn" onclick="deleteTask('${type}', ${t.id})">×</button>
                 `;
                 list.appendChild(li);
             });
 
-            // Calcul progression
             const total = tasks.length;
             const comp = tasks.filter(t => t.completed).length;
             const percent = total === 0 ? 0 : Math.round((comp/total)*100);
@@ -263,17 +265,18 @@
             const percText = col.querySelector('.perc');
             
             bar.style.width = percent + '%';
-            // Couleur dynamique (Rouge -> Orange -> Vert)
-            const hue = percent * 1.2; // 0 = Rouge, 120 = Vert
-            bar.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
+            // Couleur dégradée du Rouge sombre au Rouge Vif
+            const brightness = 30 + (percent * 0.4); 
+            bar.style.backgroundColor = `hsl(0, 100%, ${brightness}%)`;
             percText.innerText = percent + '%';
-            percText.style.color = `hsl(${hue}, 70%, 50%)`;
+            percText.style.color = `hsl(0, 100%, ${brightness}%)`;
         });
         
-        localStorage.setItem('multiColumnGoals', JSON.stringify(allData));
+        localStorage.setItem('redPerformanceDashboard', JSON.stringify(allData));
     }
 
-    // Initialisation
+    setInterval(updateTimers, 1000);
+    updateTimers();
     updateUI();
 </script>
 
