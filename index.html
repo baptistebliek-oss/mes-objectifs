@@ -28,371 +28,295 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  padding-bottom: 100px;
-}
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 100px; }
 
 /* ── TOPBAR ── */
 .topbar {
-  position: sticky; top: 0; z-index: 50;
-  background: rgba(13,13,15,.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border2);
-  padding: 0 28px; height: 64px;
-  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50; background: rgba(13,13,15,.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border2); padding: 0 28px; height: 64px; display: flex; align-items: center; justify-content: space-between;
 }
 .topbar-left { display: flex; align-items: center; gap: 14px; }
-.logo {
-  width: 32px; height: 32px;
-  background: linear-gradient(135deg, var(--violet), var(--blue));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0;
-}
-.topbar-title { font-size: .95rem; font-weight: 700; color: var(--text); }
-
-.topbar-right { display: flex; align-items: center; gap: 20px; }
-#dateDisplay { font-size: .75rem; font-weight: 500; color: var(--text3); letter-spacing: .4px; }
+.logo { width: 32px; height: 32px; background: linear-gradient(135deg, var(--violet), var(--blue)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: #fff; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+#dateDisplay { font-size: .75rem; font-weight: 500; color: var(--text3); }
 
 .btn-cal-toggle {
-  background: var(--s2);
-  border: 1px solid var(--border);
-  color: var(--text3);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
+  background: var(--s2); border: 1px solid var(--border); color: var(--text2); padding: 7px 14px; border-radius: 10px;
+  font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;
 }
-.btn-cal-toggle:hover { color: var(--text2); border-color: var(--text3); }
+.btn-cal-toggle:hover { background: var(--s3); color: var(--text); }
 
-/* ── MAIN ── */
+/* ── GRID & COLUMNS ── */
 .main { padding: 28px 20px; max-width: 1440px; margin: 0 auto; }
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  align-items: start;
-}
-
-/* ── COLUMN ── */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; align-items: start; }
 .col { background: var(--s1); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
 .col-header { padding: 18px 18px 14px; border-bottom: 1px solid var(--border2); }
 .col-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.col-label-wrap { display: flex; flex-direction: column; gap: 3px; }
-.col-title { font-size: .95rem; font-weight: 700; color: var(--text); }
-.time-left { font-size: .68rem; font-weight: 500; color: var(--text3); }
+.col-title { font-size: .95rem; font-weight: 700; }
+.ring-wrap { position: relative; width: 42px; height: 42px; transform: rotate(-90deg); }
+.ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 800; transform: rotate(90deg); }
 
-/* Ring */
-.ring-wrap { position: relative; width: 42px; height: 42px; flex-shrink: 0; }
-.ring-wrap svg { transform: rotate(-90deg); display: block; }
-.ring-bg   { fill: none; stroke: var(--s3); stroke-width: 3.5; }
-.ring-fill { fill: none; stroke-width: 3.5; stroke-linecap: round; transition: stroke-dashoffset .7s cubic-bezier(.4,0,.2,1); }
-.ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 800; }
-.col-count { font-size: .68rem; font-weight: 600; color: var(--text3); margin-top: 2px; }
-
-.prog-track { height: 3px; background: var(--s3); border-radius: 99px; overflow: hidden; }
-.prog-bar   { height: 100%; border-radius: 99px; opacity: .65; transition: width .7s cubic-bezier(.4,0,.2,1); }
-
-/* ── TASK LIST ── */
+/* ── CARDS ── */
 .task-list { list-style: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 50px; }
+.task-card { background: var(--s2); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 13px; cursor: grab; transition: 0.2s; }
+.task-card.dragging { opacity: 0.4; }
+.task-card.done { background: rgba(52,211,153,.04); opacity: 0.7; }
+.task-card.locked { opacity: 0.25; filter: grayscale(1); pointer-events: none; }
+.task-text { font-size: .875rem; font-weight: 500; flex: 1; cursor: pointer; }
+.task-card.done .task-text { text-decoration: line-through; color: var(--text3); }
+.recur-pill { font-size: .55rem; font-weight: 700; text-transform: uppercase; color: var(--text3); background: var(--s3); padding: 2px 8px; border-radius: 99px; }
 
-.task-card {
-  background: var(--s2);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  padding: 12px 13px;
-  transition: background .18s, border-color .18s, opacity .2s, transform .1s;
-  cursor: grab;
-}
-.task-card.dragging { opacity: 0.4; transform: scale(0.98); }
-.task-card:hover { background: var(--s3); border-color: var(--border); }
-.task-card.locked { opacity: .25; filter: grayscale(1); pointer-events: none; }
-.task-card.done { background: rgba(52,211,153,.04); border-color: rgba(52,211,153,.13); }
+/* ── MODALS ── */
+.overlay { position: fixed; inset: 0; background: rgba(5,5,8,.85); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal { background: var(--s1); border: 1px solid var(--border); border-radius: 24px; padding: 28px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
 
-.task-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; pointer-events: none; }
-.recur-pill { font-size: .58rem; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--text3); background: var(--s3); padding: 2px 7px; border-radius: 99px; }
-.del-btn { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--text3); cursor: pointer; border-radius: 6px; pointer-events: auto; }
-.del-btn:hover { background: rgba(248,113,113,.1); color: var(--red); }
+/* ── CALENDAR SPECIFIC ── */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 15px; }
+.cal-cell { aspect-ratio: 1; background: var(--s2); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; border: 1px solid transparent; }
+.cal-cell.today { border-color: var(--violet); color: var(--violet); background: rgba(124,106,247,0.05); }
+.cal-day-label { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; text-align: center; margin-bottom: 5px; }
+.dot-row { display: flex; gap: 2px; margin-top: 3px; }
+.dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text3); }
 
-.task-body { display: flex; align-items: center; gap: 11px; }
-.check { width: 20px; height: 20px; border: 2px solid var(--s3); border-radius: 7px; flex-shrink: 0; cursor: pointer; position: relative; background: var(--s1); }
-.task-card.done .check { background: var(--green); border-color: var(--green); }
-.task-card.done .check::after { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 5l3.5 3.5L11 1' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/11px no-repeat; }
-.task-text { font-size: .875rem; font-weight: 500; color: var(--text); flex: 1; }
-.task-card.done .task-text { color: var(--text3); text-decoration: line-through; }
+/* ── UPCOMING LIST IN CALENDAR ── */
+.upcoming-section { margin-top: 30px; border-top: 1px solid var(--border2); pt: 20px; }
+.upcoming-title { font-size: 0.75rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.upcoming-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: var(--s2); border-radius: 12px; margin-bottom: 6px; border: 1px solid var(--border2); }
+.upcoming-date { font-size: 0.65rem; font-weight: 700; color: var(--violet); background: rgba(124,106,247,0.1); padding: 3px 8px; border-radius: 6px; min-width: 65px; text-align: center; }
+.upcoming-name { font-size: 0.8rem; font-weight: 500; color: var(--text); }
 
-/* ── CALENDAR MODAL ── */
-.cal-container { width: 100%; }
-.cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
-.cal-day-name { font-size: 0.65rem; font-weight: 700; color: var(--text3); text-transform: uppercase; padding-bottom: 5px; }
-.cal-cell {
-  aspect-ratio: 1;
-  background: var(--s2);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  position: relative;
-}
-.cal-cell.today { border-color: var(--violet); color: var(--violet); }
-.cal-cell.empty { opacity: 0; pointer-events: none; }
-.cal-dots { display: flex; gap: 3px; margin-top: 4px; height: 4px; }
-.dot { width: 4px; height: 4px; border-radius: 50%; }
+.fab { position: fixed; bottom: 28px; right: 28px; width: 54px; height: 54px; background: linear-gradient(135deg, var(--violet), var(--blue)); border-radius: 16px; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
-/* ── UI ELEMENTS ── */
-.fab { position: fixed; bottom: 28px; right: 28px; width: 54px; height: 54px; background: linear-gradient(135deg, var(--violet), var(--blue)); border: none; border-radius: 16px; color: #fff; cursor: pointer; z-index: 200; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
-.overlay { position: fixed; inset: 0; background: rgba(5,5,8,.82); backdrop-filter: blur(18px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 12px; }
-.modal { background: var(--s1); border: 1px solid var(--border); border-radius: 24px; padding: 24px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
-.hidden { display: none !important; }
-
-#bravo { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; z-index: 9999; opacity: 0; }
-#bravo.show { animation: bravoAnim 1.8s ease forwards; }
-@keyframes bravoAnim { 0% { opacity:0; transform:scale(.65); } 14% { opacity:1; transform:scale(1.06); } 100% { opacity:0; transform:scale(1.1); } }
-.bravo-word { font-size: clamp(5rem,18vw,10rem); font-weight: 800; background: linear-gradient(135deg, var(--violet), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+#bravo { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2000; opacity: 0; }
+#bravo.show { animation: bravo 1.5s ease-out; }
+@keyframes bravo { 0% { opacity:0; transform: scale(0.8); } 20% { opacity:1; transform: scale(1.1); } 80% { opacity:1; } 100% { opacity:0; } }
 </style>
 </head>
 <body>
 
-<div id="bravo">
-  <div class="bravo-word">BRAVO</div>
-</div>
+<div id="bravo"><h1 style="font-size: 5rem; font-weight: 900; background: linear-gradient(to right, var(--violet), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">BRAVO</h1></div>
 
 <header class="topbar">
-  <div class="topbar-left">
-    <div class="logo">P</div>
-    <span class="topbar-title">Performance Elite</span>
-  </div>
+  <div class="topbar-left"><div class="logo">P</div><span class="topbar-title">Performance Elite</span></div>
   <div class="topbar-right">
     <span id="dateDisplay"></span>
     <button class="btn-cal-toggle" onclick="openCalendar()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      Calendrier
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Calendrier
     </button>
   </div>
 </header>
 
 <main class="main">
-  <div class="grid" id="grid"></div>
+  <div class="grid" id="mainGrid"></div>
 </main>
 
-<button class="fab" onclick="openModal()" title="Nouvel objectif">
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-</button>
+<button class="fab" onclick="openModal()"><b>+</b></button>
 
-<div class="overlay" id="overlay">
+<div class="overlay" id="taskOverlay">
   <div class="modal">
-    <div class="modal-header" style="display:flex; justify-content:space-between; margin-bottom:20px;">
-      <span class="modal-title" id="modalTitle" style="font-weight:800">Nouvel objectif</span>
-      <button onclick="closeModal()" style="background:none; border:none; color:var(--text3); font-size:20px; cursor:pointer">×</button>
-    </div>
-    <input type="hidden" id="editId">
-    <div class="form-group">
-      <label class="form-label" style="display:block; font-size:0.65rem; color:var(--text3); text-transform:uppercase; margin-bottom:5px">Nom</label>
-      <input type="text" id="fName" oninput="syncForm()" style="width:100%; background:var(--s2); border:1px solid var(--border); padding:10px; border-radius:10px; color:var(--text)">
-    </div>
-    <div class="form-group hidden" id="grpScope">
-        <label class="form-label">Portée</label>
-        <select id="fScope" onchange="syncForm()" style="width:100%; background:var(--s2); border:1px solid var(--border); padding:10px; border-radius:10px; color:var(--text)">
-          <option value="today">Journalier</option>
-          <option value="week">Semaine</option>
-          <option value="month">Mois</option>
-          <option value="year">Année</option>
+    <h3 style="margin-bottom: 20px;">Nouvel Objectif</h3>
+    <input type="text" id="fName" placeholder="Titre de l'objectif..." style="width:100%; padding:12px; background:var(--s2); border:1px solid var(--border); border-radius:12px; color:white; margin-bottom:15px;">
+    
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom:15px;">
+        <select id="fScope" style="padding:10px; background:var(--s2); border:1px solid var(--border); border-radius:10px; color:white;">
+            <option value="today">Aujourd'hui</option>
+            <option value="week">Semaine</option>
+            <option value="month">Mois</option>
         </select>
+        <input type="date" id="fDate" style="padding:10px; background:var(--s2); border:1px solid var(--border); border-radius:10px; color:white;">
     </div>
-    <div id="grpSubmitBtn" class="hidden" style="margin-top:20px">
-        <button class="btn-save" onclick="saveTask()" style="width:100%; padding:12px; background:var(--violet); border:none; border-radius:12px; color:white; font-weight:700; cursor:pointer">Enregistrer</button>
-    </div>
+
+    <button onclick="saveTask()" style="width:100%; padding:14px; background:var(--violet); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Enregistrer l'objectif</button>
+    <button onclick="closeModal()" style="width:100%; background:none; border:none; color:var(--text3); margin-top:10px; cursor:pointer;">Annuler</button>
   </div>
 </div>
 
 <div class="overlay" id="calOverlay">
-  <div class="modal" style="max-width:500px">
-    <div class="cal-head">
-      <button onclick="changeMonth(-1)" style="background:none; border:none; color:var(--text2); cursor:pointer">←</button>
-      <span id="calMonthLabel" style="font-weight:700; font-size:1rem"></span>
-      <button onclick="changeMonth(1)" style="background:none; border:none; color:var(--text2); cursor:pointer">→</button>
+  <div class="modal" style="max-width: 520px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button onclick="changeMonth(-1)" style="background:none; border:none; color:var(--text3); cursor:pointer;">←</button>
+        <h3 id="calMonthLabel">Mars 2024</h3>
+        <button onclick="changeMonth(1)" style="background:none; border:none; color:var(--text3); cursor:pointer;">→</button>
     </div>
+
     <div class="cal-grid" id="calendarGrid"></div>
-    <button onclick="closeCalendar()" style="width:100%; margin-top:20px; background:none; border:none; color:var(--text3); cursor:pointer; font-size:0.8rem">Fermer</button>
+
+    <div class="upcoming-section">
+        <div class="upcoming-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 2v20M2 12h20"/></svg>
+            Échéances à venir
+        </div>
+        <div id="upcomingList">
+            </div>
+    </div>
+
+    <button onclick="closeCalendar()" style="width:100%; margin-top:20px; padding:10px; background:var(--s2); border:1px solid var(--border); border-radius:12px; color:var(--text2); cursor:pointer;">Fermer la vue</button>
   </div>
 </div>
 
 <script>
-let tasks  = JSON.parse(localStorage.getItem('v28_tasks'))  || [];
-let counts = JSON.parse(localStorage.getItem('v28_counts')) || {};
+let tasks = JSON.parse(localStorage.getItem('elite_tasks')) || [];
 let currentCalDate = new Date();
 
 const COLS = [
-  { id: 'today', label: "Aujourd'hui" },
-  { id: 'week',  label: 'Cette semaine' },
-  { id: 'month', label: 'Ce mois' },
-  { id: 'year',  label: 'Cette année' },
+  { id: 'today', label: "Aujourd'hui", color: '#7c6af7' },
+  { id: 'week', label: 'Semaine', color: '#5b9cf6' },
+  { id: 'month', label: 'Mois', color: '#34d399' }
 ];
 
-const COL_COLOR = { today: '#7c6af7', week: '#5b9cf6', month: '#34d399', year: '#fbbf24' };
+function save() { localStorage.setItem('elite_tasks', JSON.stringify(tasks)); }
 
-function save() {
-  localStorage.setItem('v28_tasks',  JSON.stringify(tasks));
-  localStorage.setItem('v28_counts', JSON.stringify(counts));
-}
-
-// ── DRAG & DROP ──
-function initDragAndDrop() {
-  document.querySelectorAll('.task-list').forEach(list => {
-    list.addEventListener('dragover', e => {
-      e.preventDefault();
-      const dragging = document.querySelector('.dragging');
-      const afterElement = [...list.querySelectorAll('.task-card:not(.dragging)')].reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = e.clientY - box.top - box.height / 2;
-        return (offset < 0 && offset > closest.offset) ? { offset, element: child } : closest;
-      }, { offset: Number.NEGATIVE_INFINITY }).element;
-      if (!afterElement) list.appendChild(dragging); else list.insertBefore(dragging, afterElement);
-    });
-    list.addEventListener('drop', () => {
-      const newTasks = [];
-      document.querySelectorAll('.task-card').forEach(el => newTasks.push(tasks.find(t => t.id === el.dataset.id)));
-      tasks.forEach(t => { if(!newTasks.find(nt => nt.id === t.id)) newTasks.push(t); });
-      tasks = newTasks; save();
-    });
-  });
-}
-
-// ── CALENDRIER ──
-function openCalendar() {
-  document.getElementById('calOverlay').style.display = 'flex';
-  renderCalendar();
-}
-function closeCalendar() { document.getElementById('calOverlay').style.display = 'none'; }
-function changeMonth(dir) {
-  currentCalDate.setMonth(currentCalDate.getMonth() + dir);
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const grid = document.getElementById('calendarGrid');
-  const label = document.getElementById('calMonthLabel');
-  grid.innerHTML = '';
-
-  const year = currentCalDate.getFullYear();
-  const month = currentCalDate.getMonth();
-  label.textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(currentCalDate);
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDay = new Date(year, month, 1).getDay();
-  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
-
-  ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].forEach(d => {
-    grid.insertAdjacentHTML('beforeend', `<div class="cal-day-name">${d}</div>`);
-  });
-
-  for (let i = 0; i < startOffset; i++) grid.insertAdjacentHTML('beforeend', `<div class="cal-cell empty"></div>`);
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const dObj = new Date(year, month, day);
-    const isToday = new Date().toDateString() === dObj.toDateString();
-    
-    // Trouver les tâches pour ce jour
-    const dayTasks = tasks.filter(t => {
-        if (t.scope === 'today') return true; // simplifié pour la démo
-        return false;
-    });
-
-    let dotsHtml = '<div class="cal-dots">';
-    // On affiche max 3 points pour le design
-    const colors = ['#7c6af7', '#5b9cf6', '#34d399'];
-    for(let j=0; j<Math.min(dayTasks.length, 3); j++) {
-        dotsHtml += `<div class="dot" style="background:${colors[j]}"></div>`;
-    }
-    dotsHtml += '</div>';
-
-    grid.insertAdjacentHTML('beforeend', `
-      <div class="cal-cell ${isToday ? 'today' : ''}">
-        ${day}
-        ${dayTasks.length > 0 ? dotsHtml : ''}
-      </div>
-    `);
-  }
-}
-
-// ── LOGIQUE DE BASE ──
 function render() {
-  const now = new Date();
-  document.getElementById('dateDisplay').textContent = now.toLocaleDateString('fr-FR', { day:'numeric', month:'long' });
-  const grid = document.getElementById('grid');
+  const grid = document.getElementById('mainGrid');
   grid.innerHTML = '';
+  document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('fr-FR', {day:'numeric', month:'long'});
 
   COLS.forEach(col => {
-    const c = COL_COLOR[col.id];
-    const vis = tasks.filter(t => t.scope === col.id);
-    const done = vis.filter(t => t.completed).length;
-    const total = vis.length;
-    const pct = total ? Math.round(done/total*100) : 0;
-    const C = 100.5, offset = C - (pct/100)*C;
-
-    const items = vis.map(t => `
-      <li class="task-card${t.completed?' done':''}" draggable="true" data-id="${t.id}" ondragstart="this.classList.add('dragging')" ondragend="this.classList.remove('dragging')">
-        <div class="task-top"><span class="recur-pill">Unique</span><button class="del-btn" onclick="deleteTask('${t.id}')">×</button></div>
-        <div class="task-body"><div class="check" onclick="toggleTask('${t.id}')"></div><span class="task-text">${t.text}</span></div>
-      </li>`).join('');
+    const colTasks = tasks.filter(t => t.scope === col.id);
+    const done = colTasks.filter(t => t.completed).length;
+    const pct = colTasks.length ? Math.round((done/colTasks.length)*100) : 0;
+    
+    const items = colTasks.map(t => `
+      <li class="task-card ${t.completed?'done':''}" draggable="true" data-id="${t.id}" ondragstart="this.classList.add('dragging')" ondragend="this.classList.remove('dragging')">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span class="recur-pill">${t.date || 'Unique'}</span>
+            <button onclick="deleteTask('${t.id}')" style="background:none; border:none; color:var(--text3); cursor:pointer;">×</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div onclick="toggleTask('${t.id}')" style="width:18px; height:18px; border:2px solid ${t.completed?col.color:'var(--s3)'}; border-radius:5px; background:${t.completed?col.color:'none'}; cursor:pointer;"></div>
+            <span class="task-text">${t.text}</span>
+        </div>
+      </li>
+    `).join('');
 
     grid.insertAdjacentHTML('beforeend', `
       <div class="col">
         <div class="col-header">
-          <div class="col-top">
-            <span class="col-title">${col.label}</span>
-            <div class="ring-wrap">
-              <svg width="42" height="42" viewBox="0 0 42 42"><circle class="ring-bg" cx="21" cy="21" r="16"/><circle class="ring-fill" cx="21" cy="21" r="16" stroke="${c}" stroke-dasharray="100.5" stroke-dashoffset="${offset}"/></svg>
-              <span class="ring-pct" style="color:${c}">${pct}%</span>
+            <div class="col-top">
+                <span class="col-title">${col.label}</span>
+                <div class="ring-wrap">
+                    <svg width="42" height="42"><circle cx="21" cy="21" r="16" fill="none" stroke="var(--s3)" stroke-width="3"/><circle cx="21" cy="21" r="16" fill="none" stroke="${col.color}" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="${100-pct}"/></svg>
+                    <div class="ring-pct" style="color:${col.color}">${pct}%</div>
+                </div>
             </div>
-          </div>
         </div>
-        <ul class="task-list">${items || '<div class="empty">Vide</div>'}</ul>
-      </div>`);
+        <ul class="task-list" data-scope="${col.id}">${items || '<div style="text-align:center; padding:20px; color:var(--text3); font-size:0.7rem;">Aucun objectif</div>'}</ul>
+      </div>
+    `);
   });
-  initDragAndDrop();
-  save();
+  initDragEvents();
 }
 
-function openModal() { document.getElementById('overlay').style.display='flex'; }
-function closeModal() { document.getElementById('overlay').style.display='none'; }
-function syncForm() {
-    const name = document.getElementById('fName').value;
-    document.getElementById('grpScope').classList.toggle('hidden', !name);
-    document.getElementById('grpSubmitBtn').classList.toggle('hidden', !name);
+// ── CALENDRIER & PROCHAINS OBJECTIFS ──
+function openCalendar() {
+    document.getElementById('calOverlay').style.display = 'flex';
+    renderCalendar();
+    renderUpcoming();
 }
-function saveTask() {
-    const t = { id: 'T-'+Date.now(), text: document.getElementById('fName').value, scope: document.getElementById('fScope').value, completed: false };
-    tasks.push(t); closeModal(); render();
-}
-function toggleTask(id) { 
-    const t = tasks.find(x => x.id === id); 
-    t.completed = !t.completed; 
-    if(t.completed) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#7c6af7', '#34d399'] });
-        const b = document.getElementById('bravo'); b.classList.add('show'); setTimeout(()=>b.classList.remove('show'), 1800);
+
+function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    const label = document.getElementById('calMonthLabel');
+    grid.innerHTML = '';
+    
+    const year = currentCalDate.getFullYear();
+    const month = currentCalDate.getMonth();
+    label.textContent = new Intl.DateTimeFormat('fr-FR', {month:'long', year:'numeric'}).format(currentCalDate);
+
+    const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
+    const days = new Date(year, month + 1, 0).getDate();
+
+    ['L','M','M','J','V','S','D'].forEach(d => grid.insertAdjacentHTML('beforeend', `<div class="cal-day-label">${d}</div>`));
+    for(let i=0; i<firstDay; i++) grid.insertAdjacentHTML('beforeend', `<div></div>`);
+    
+    for(let d=1; d<=days; d++) {
+        const isToday = new Date().toDateString() === new Date(year, month, d).toDateString();
+        const hasTask = tasks.some(t => t.date === `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+        grid.insertAdjacentHTML('beforeend', `
+            <div class="cal-cell ${isToday?'today':''}">
+                ${d}
+                <div class="dot-row">${hasTask ? '<div class="dot" style="background:var(--violet)"></div>' : ''}</div>
+            </div>
+        `);
     }
-    render(); 
 }
-function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); render(); }
+
+function renderUpcoming() {
+    const list = document.getElementById('upcomingList');
+    list.innerHTML = '';
+
+    // Filtrer les tâches avec date, non complétées, et trier par chronologie
+    const upcoming = tasks
+        .filter(t => t.date && !t.completed)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 5); // On prend les 5 prochaines
+
+    if(upcoming.length === 0) {
+        list.innerHTML = '<div style="color:var(--text3); font-size:0.75rem; text-align:center; padding:10px;">Aucune échéance programmée</div>';
+        return;
+    }
+
+    upcoming.forEach(t => {
+        const d = new Date(t.date);
+        const dateFmt = d.toLocaleDateString('fr-FR', {day:'2-digit', month:'short'});
+        list.insertAdjacentHTML('beforeend', `
+            <div class="upcoming-item">
+                <div class="upcoming-date">${dateFmt}</div>
+                <div class="upcoming-name">${t.text}</div>
+            </div>
+        `);
+    });
+}
+
+// ── FONCTIONS GLOBALES ──
+function initDragEvents() {
+    document.querySelectorAll('.task-list').forEach(list => {
+        list.addEventListener('dragover', e => {
+            e.preventDefault();
+            const dragging = document.querySelector('.dragging');
+            list.appendChild(dragging);
+        });
+        list.addEventListener('drop', () => {
+            const newOrder = [];
+            document.querySelectorAll('.task-card').forEach(el => {
+                newOrder.push(tasks.find(t => t.id === el.dataset.id));
+            });
+            tasks = newOrder; save();
+        });
+    });
+}
+
+function openModal() { document.getElementById('taskOverlay').style.display='flex'; }
+function closeModal() { document.getElementById('taskOverlay').style.display='none'; }
+function closeCalendar() { document.getElementById('calOverlay').style.display='none'; }
+function changeMonth(v) { currentCalDate.setMonth(currentCalDate.getMonth()+v); renderCalendar(); }
+
+function saveTask() {
+    const text = document.getElementById('fName').value;
+    if(!text) return;
+    tasks.push({
+        id: 'T'+Date.now(),
+        text: text,
+        scope: document.getElementById('fScope').value,
+        date: document.getElementById('fDate').value,
+        completed: false
+    });
+    save(); render(); closeModal();
+}
+
+function toggleTask(id) {
+    const t = tasks.find(x => x.id === id);
+    t.completed = !t.completed;
+    if(t.completed) {
+        document.getElementById('bravo').classList.add('show');
+        setTimeout(() => document.getElementById('bravo').classList.remove('show'), 1500);
+        confetti({particleCount:100, spread:70, origin:{y:0.6}, colors:['#7c6af7', '#34d399']});
+    }
+    save(); render();
+}
+
+function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); save(); render(); }
 
 render();
 </script>
