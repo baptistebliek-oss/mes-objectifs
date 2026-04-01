@@ -3,94 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Performance Elite v5</title>
+    <title>Dashboard Performance Elite v6</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-color: #080808;
-            --card-bg: #121212;
-            --text-main: #ffffff;
-            --text-dim: #666;
-            --accent-red: #ff3c3c;
-            --cat-sport: #4CAF50; --cat-travail: #2196F3; --cat-perso: #FFEB3B; --cat-finance: #9C27B0; --cat-autre: #555;
+            --bg-color: #080808; --card-bg: #121212; --text-main: #ffffff; --text-dim: #555;
+            --accent-red: #ff3c3c; --cat-sport: #4CAF50; --cat-travail: #2196F3; --cat-perso: #FFEB3B; --cat-finance: #9C27B0; --cat-autre: #555;
         }
 
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        h1 { text-align: center; color: var(--accent-red); font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin: 10px 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+        h1 { color: var(--accent-red); font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin: 5px 0; font-size: 1.5rem; }
 
-        /* --- SECTION HISTORIQUE / HEATMAP --- */
-        .history-section { background: var(--card-bg); width: 100%; max-width: 1400px; padding: 20px; border-radius: 16px; border: 1px solid #1a1a1a; margin-bottom: 25px; }
-        .history-title { font-size: 0.9rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; margin-bottom: 15px; text-align: center; }
-        .heatmap { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
-        .day-square { width: 12px; height: 12px; border-radius: 2px; background: #1a1a1a; position: relative; cursor: pointer; }
-        .day-square:hover::after { content: attr(data-info); position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; white-space: nowrap; z-index: 10; }
+        /* --- MINI HEATMAP TOP --- */
+        .mini-history { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; border: 1px solid #1a1a1a; }
+        .heatmap-mini { display: flex; gap: 3px; }
+        .day-sq { width: 8px; height: 8px; border-radius: 1px; background: #222; position: relative; }
+        .day-sq:hover::after { content: attr(data-info); position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 3px 6px; border-radius: 4px; font-size: 9px; white-space: nowrap; z-index: 100; }
+        
+        .btn-full-history { background: none; border: 1px solid var(--accent-red); color: var(--accent-red); font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; cursor: pointer; text-transform: uppercase; font-weight: bold; transition: 0.3s; }
+        .btn-full-history:hover { background: var(--accent-red); color: black; }
 
-        /* Grille colonnes */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; width: 100%; max-width: 1400px; }
-        .column { background: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid #1a1a1a; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .column-header { text-align: center; margin-bottom: 15px; }
-        .column-title { font-size: 1.2rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; margin-bottom: 5px; }
-        .timer { font-family: 'Courier New', monospace; font-size: 0.85rem; color: var(--text-dim); }
+        /* --- DASHBOARD GRID --- */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; max-width: 1400px; }
+        .column { background: var(--card-bg); border-radius: 16px; padding: 18px; border: 1px solid #1a1a1a; display: flex; flex-direction: column; }
+        .column-header { text-align: center; margin-bottom: 10px; }
+        .column-title { font-size: 1.1rem; font-weight: bold; color: var(--accent-red); text-transform: uppercase; }
+        .timer { font-family: monospace; font-size: 0.75rem; color: #666; }
 
         /* Progression */
-        .progress-container { background: #1a1a1a; height: 6px; border-radius: 10px; margin: 12px 0; overflow: hidden; border: 1px solid #222; }
+        .progress-container { background: #1a1a1a; height: 5px; border-radius: 10px; margin: 10px 0; overflow: hidden; border: 1px solid #222; }
         .progress-bar { height: 100%; width: 0%; transition: width 0.8s ease; }
-        .perc { font-size: 0.8rem; font-weight: bold; }
+        .perc { font-size: 0.75rem; font-weight: bold; }
 
-        /* Sélecteur catégories */
-        .category-selector { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; padding: 5px; background: #000; border-radius: 10px; }
-        .cat-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid transparent; transition: all 0.2s; opacity: 0.4; }
+        /* Catégories Dots */
+        .category-selector { display: flex; justify-content: center; gap: 6px; margin-bottom: 10px; padding: 5px; background: #000; border-radius: 10px; }
+        .cat-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 2px solid transparent; transition: 0.2s; opacity: 0.3; }
         .cat-dot.active { opacity: 1; border-color: white; transform: scale(1.1); }
         .dot-sport { background: var(--cat-sport); } .dot-travail { background: var(--cat-travail); } .dot-perso { background: var(--cat-perso); } .dot-finance { background: var(--cat-finance); } .dot-autre { background: var(--cat-autre); }
 
         /* Inputs */
-        .input-group { display: flex; gap: 8px; }
-        input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; outline: none; }
+        .input-group { display: flex; gap: 5px; }
+        input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; outline: none; font-size: 0.9rem; }
         input:focus { border-color: var(--accent-red); }
-        .add-btn { background: var(--accent-red); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; padding: 0 18px; }
+        .add-btn { background: var(--accent-red); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; padding: 0 15px; }
 
         /* Listes */
-        ul { list-style: none; padding: 0; margin-top: 20px; }
-        li { background: #181818; margin-bottom: 12px; padding: 14px; border-radius: 10px; display: flex; flex-direction: column; border-left: 4px solid var(--accent-red); }
-        .badge { font-size: 0.6rem; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; font-weight: 900; margin-bottom: 8px; width: fit-content; }
+        ul { list-style: none; padding: 0; margin-top: 15px; }
+        li { background: #181818; margin-bottom: 8px; padding: 12px; border-radius: 10px; display: flex; flex-direction: column; border-left: 3px solid var(--accent-red); }
+        .badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 900; margin-bottom: 6px; width: fit-content; }
         .badge-sport { background: var(--cat-sport); color: #000; } .badge-travail { background: var(--cat-travail); color: #fff; } .badge-perso { background: var(--cat-perso); color: #000; } .badge-finance { background: var(--cat-finance); color: #fff; } .badge-autre { background: var(--cat-autre); color: #fff; }
         .task-header { display: flex; justify-content: space-between; align-items: center; }
-        .task-text { cursor: pointer; flex-grow: 1; font-size: 0.95rem; }
-        .completed { text-decoration: line-through; color: #444; opacity: 0.5; }
-        .delete-btn { color: #333; cursor: pointer; background: none; border: none; font-size: 1.2rem; }
+        .task-text { cursor: pointer; flex-grow: 1; font-size: 0.9rem; }
+        .completed { text-decoration: line-through; color: #444; opacity: 0.4; }
+        .delete-btn { color: #333; cursor: pointer; background: none; border: none; font-size: 1.1rem; }
 
-        .calendar-box { margin-bottom: 20px; }
-        .calendar-link { color: var(--accent-red); text-decoration: none; font-weight: bold; font-size: 0.8rem; border: 1px solid #222; padding: 8px 15px; border-radius: 20px; }
-        
-        #bravoOverlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 100; background: rgba(0,0,0,0.95); }
-        #bravoOverlay h2 { font-size: 6rem; color: var(--accent-red); font-weight: 900; }
+        /* --- OVERLAY HISTORIQUE COMPLET --- */
+        #historyOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; z-index: 1000; padding: 40px 20px; overflow-y: auto; }
+        .full-heatmap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; max-width: 600px; width: 100%; margin-top: 20px; }
+        .day-cell { background: #111; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #222; }
+        .day-cell .date-label { font-size: 0.7rem; color: #666; display: block; }
+        .day-cell .score-label { font-size: 1rem; font-weight: bold; margin-top: 5px; }
+        .close-history { background: var(--accent-red); border: none; color: white; padding: 10px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 30px; }
+
+        #bravoOverlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 2000; background: rgba(0,0,0,0.9); }
+        #bravoOverlay h2 { font-size: 5rem; color: var(--accent-red); font-weight: 900; }
     </style>
 </head>
 <body>
 
-<div id="bravoOverlay"><h2>TERMINÉ</h2></div>
+<div id="bravoOverlay"><h2>BAM !</h2></div>
+
+<div id="historyOverlay">
+    <h2 style="color:var(--accent-red); text-transform: uppercase;">Historique de Discipline</h2>
+    <p id="stats-summary" style="color:#888;">Chargement des statistiques...</p>
+    <div class="full-heatmap" id="fullHeatmap"></div>
+    <button class="close-history" onclick="toggleFullHistory(false)">Fermer l'historique</button>
+</div>
 
 <h1>PERFORMANCE DASHBOARD</h1>
 
-<div class="history-section">
-    <div class="history-title">Historique de Discipline (30 derniers jours)</div>
-    <div class="heatmap" id="heatmap"></div>
+<div class="mini-history">
+    <span style="font-size: 0.7rem; color: #888; font-weight: bold;">30j :</span>
+    <div class="heatmap-mini" id="miniHeatmap"></div>
+    <button class="btn-full-history" onclick="toggleFullHistory(true)">Voir tout</button>
 </div>
 
-<div class="calendar-box">
-    <a href="https://calendar.google.com" target="_blank" class="calendar-link">📅 CONSULTER GOOGLE CALENDAR</a>
-</div>
-
-<div class="dashboard-grid" id="grid"></div>
+<div class="dashboard-grid" id="mainGrid"></div>
 
 <script>
-    // Initialisation des données
-    let allData = JSON.parse(localStorage.getItem('v5_performance_data')) || { 
-        journalier: [], hebdomadaire: [], mensuel: [], annuel: [] 
-    };
-    
-    // Historique des scores (Date: "YYYY-MM-DD", Score: %)
-    let historyData = JSON.parse(localStorage.getItem('v5_history_data')) || {};
+    let allData = JSON.parse(localStorage.getItem('v6_performance_data')) || { journalier: [], hebdomadaire: [], mensuel: [], annuel: [] };
+    let historyData = JSON.parse(localStorage.getItem('v6_history_data')) || {};
     let selectedCats = { journalier: 'sport', hebdomadaire: 'sport', mensuel: 'sport', annuel: 'sport' };
 
     const types = [
@@ -100,8 +102,8 @@
         {id: 'annuel', label: "Année"}
     ];
 
-    // Génération du HTML des colonnes
-    const grid = document.getElementById('grid');
+    // Génération Colonnes
+    const grid = document.getElementById('mainGrid');
     types.forEach(t => {
         grid.innerHTML += `
             <div class="column" id="col-${t.id}">
@@ -165,47 +167,62 @@
         setTimeout(() => overlay.style.display = 'none', 800);
     }
 
-    // --- MISE À JOUR HEATMAP ---
-    function updateHeatmap() {
-        const heatmap = document.getElementById('heatmap');
-        heatmap.innerHTML = '';
+    function toggleFullHistory(show) {
+        const overlay = document.getElementById('historyOverlay');
+        overlay.style.display = show ? 'flex' : 'none';
+        if(show) renderFullHistory();
+    }
+
+    // --- RENDU HISTORIQUE ---
+    function renderMiniHeatmap() {
+        const mini = document.getElementById('miniHeatmap');
+        mini.innerHTML = '';
         const today = new Date();
         
-        // Calcul du score du jour actuel
-        let totalTasks = 0, completedTasks = 0;
-        Object.values(allData).forEach(arr => {
-            totalTasks += arr.length;
-            completedTasks += arr.filter(t => t.completed).length;
-        });
-        const todayScore = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
-        
-        const dateKey = today.toISOString().split('T')[0];
-        historyData[dateKey] = todayScore;
-        localStorage.setItem('v5_history_data', JSON.stringify(historyData));
+        // Calcul score aujourd'hui
+        let total = 0, comp = 0;
+        Object.values(allData).forEach(arr => { total += arr.length; comp += arr.filter(t=>t.completed).length; });
+        const score = total === 0 ? 0 : Math.round((comp/total)*100);
+        historyData[today.toISOString().split('T')[0]] = score;
+        localStorage.setItem('v6_history_data', JSON.stringify(historyData));
 
-        // Générer les 30 derniers jours
         for (let i = 29; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(today.getDate() - i);
+            const d = new Date(); d.setDate(today.getDate() - i);
             const key = d.toISOString().split('T')[0];
-            const score = historyData[key] || 0;
-            
-            const square = document.createElement('div');
-            square.className = 'day-square';
-            // Couleur : du rouge sombre (20%) au rouge vif (100%)
-            if (score > 0) {
-                square.style.background = `hsl(0, 100%, ${Math.max(15, score/2)}%)`;
-                square.style.boxShadow = `0 0 5px hsl(0, 100%, ${score/2}%, 0.5)`;
-            }
-            square.setAttribute('data-info', `${key} : ${score}% réussi`);
-            heatmap.appendChild(square);
+            const val = historyData[key] || 0;
+            const sq = document.createElement('div');
+            sq.className = 'day-sq';
+            if(val > 0) sq.style.background = `hsl(0, 100%, ${Math.max(15, val/2)}%)`;
+            sq.setAttribute('data-info', `${key} : ${val}%`);
+            mini.appendChild(sq);
         }
+    }
+
+    function renderFullHistory() {
+        const full = document.getElementById('fullHeatmap');
+        const stats = document.getElementById('stats-summary');
+        full.innerHTML = '';
+        
+        const keys = Object.keys(historyData).sort().reverse();
+        let avg = 0;
+        
+        keys.forEach(key => {
+            const val = historyData[key];
+            avg += val;
+            const cell = document.createElement('div');
+            cell.className = 'day-cell';
+            cell.style.borderColor = val > 0 ? `hsl(0, 100%, ${val/2}%)` : '#222';
+            cell.innerHTML = `<span class="date-label">${key}</span><span class="score-label" style="color:hsl(0,100%,${Math.max(40, val/1.2)}%)">${val}%</span>`;
+            full.appendChild(cell);
+        });
+
+        const mean = keys.length ? Math.round(avg / keys.length) : 0;
+        stats.innerText = `Enregistré sur ${keys.length} jours — Moyenne de discipline : ${mean}%`;
     }
 
     function updateTimers() {
         const now = new Date();
-        const endDay = new Date().setHours(23,59,59);
-        document.getElementById('timer-journalier').innerText = format(endDay - now);
+        document.getElementById('timer-journalier').innerText = format(new Date().setHours(23,59,59) - now);
         const endSun = new Date(); endSun.setDate(now.getDate() + (7 - now.getDay()) % 7); endSun.setHours(23,59,59);
         document.getElementById('timer-hebdomadaire').innerText = format(endSun - now, true);
         const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
@@ -224,13 +241,13 @@
             const list = document.getElementById(`list-${t.id}`);
             list.innerHTML = '';
             const tasks = allData[t.id];
-            tasks.forEach(task => {
+            tasks.forEach(tk => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <span class="badge badge-${task.category}">${task.category}</span>
+                    <span class="badge badge-${tk.category}">${tk.category}</span>
                     <div class="task-header">
-                        <span class="task-text ${task.completed ? 'completed' : ''}" onclick="toggleTask('${t.id}', ${task.id})">${task.text}</span>
-                        <button class="delete-btn" onclick="deleteTask('${t.id}', ${task.id})">×</button>
+                        <span class="task-text ${tk.completed ? 'completed' : ''}" onclick="toggleTask('${t.id}', ${tk.id})">${tk.text}</span>
+                        <button class="delete-btn" onclick="deleteTask('${t.id}', ${tk.id})">×</button>
                     </div>
                 `;
                 list.appendChild(li);
@@ -241,8 +258,8 @@
             col.querySelector('.progress-bar').style.backgroundColor = `hsl(0, 100%, ${30+(percent*0.4)}%)`;
             col.querySelector('.perc').innerText = percent + '%';
         });
-        localStorage.setItem('v5_performance_data', JSON.stringify(allData));
-        updateHeatmap();
+        localStorage.setItem('v6_performance_data', JSON.stringify(allData));
+        renderMiniHeatmap();
     }
 
     setInterval(updateTimers, 1000);
