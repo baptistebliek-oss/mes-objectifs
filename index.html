@@ -579,7 +579,7 @@ function toggle(id){const t=S.tasks.find(x=>x.id===id);if(!t)return;if(!t.comple
 function del(id){const t=S.tasks.find(x=>x.id===id);if(!t)return;dialog({icon:'🗑️',ic:'warn',title:'Supprimer cet objectif ?',body:`« ${t.text} » sera définitivement supprimé.`,actions:[{lbl:'Annuler',cls:'ghost',fn:null},{lbl:'Supprimer',cls:'danger',fn:()=>{S.tasks=S.tasks.filter(x=>x.id!==id);render();save();toast('Objectif supprimé');}}]});}
 function increment(id){const t=S.tasks.find(x=>x.id===id);if(!t||t.completed)return;const tc=t.targetCount||1;t.doneCount=Math.min(tc,(t.doneCount||0)+1);if(t.doneCount>=tc){t.completed=true;const k=rk(t,new Date());if(k)t.resetKeys={...t.resetKeys,[t.scope]:k};logDay(t,true);ysInc('done');pop();celebrate();}else{pop();}render();save();chkBadges();}
 function decrement(id){const t=S.tasks.find(x=>x.id===id);if(!t)return;t.doneCount=Math.max(0,(t.doneCount||0)-1);if(t.doneCount<(t.targetCount||1))t.completed=false;render();save();}
-function bonus(id){const t=S.tasks.find(x=>x.id===id);if(!t||!t.completed)return;t.bonusCount=(t.bonusCount||0)+1;ysInc('bonus');pop();toast('Effort bonus enregistré ⭐');render();save();chkBadges();}
+function bonus(id){const t=S.tasks.find(x=>x.id===id);if(!t||!t.completed)return;t.bonusCount=(t.bonusCount||0)+1;S.counts[t.id]=(S.counts[t.id]||0)+1;ysInc('bonus');pop();toast('Effort bonus enregistré ⭐');render();save();chkBadges();}
 
 // ── Validation ────────────────────────────────────────────────────────
 function validate(name,date,recur,md){const e={};if(!name.trim())e.name='Le nom est obligatoire.';else if(name.length>100)e.name='Maximum 100 caractères.';if(date&&isNaN(new Date(date).getTime()))e.date='Date invalide.';if(recur==='monthly'&&(md<1||md>31))e.md='Jour entre 1 et 31.';return e;}
