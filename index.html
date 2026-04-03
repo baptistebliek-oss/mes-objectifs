@@ -57,7 +57,22 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100
 .yr-btn:focus-visible{outline:2px solid var(--v);outline-offset:2px;}
 
 /* Badge notif */
-#badgeNotif{position:fixed;top:78px;right:24px;background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:12px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:3000;opacity:0;pointer-events:none;transform:translateX(20px);transition:opacity .35s,transform .35s cubic-bezier(.34,1.56,.64,1);max-width:260px;}
+#badgeAnim{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:9998;opacity:0;}
+#badgeAnim.show{animation:badgeAnimIn 2.8s ease forwards;}
+@keyframes badgeAnimIn{
+  0%  {opacity:0;transform:scale(.5);}
+  12% {opacity:1;transform:scale(1.08);}
+  22% {transform:scale(.96);}
+  32% {transform:scale(1.03);}
+  65% {opacity:1;transform:scale(1);}
+  100%{opacity:0;transform:scale(1.08);}
+}
+.badge-anim-glow{position:absolute;width:220px;height:220px;border-radius:50%;filter:blur(55px);opacity:.55;animation:badgeGlowPulse 1.2s ease-in-out infinite alternate;}
+@keyframes badgeGlowPulse{from{transform:scale(.9);}to{transform:scale(1.1);}}
+.badge-anim-icon{font-size:5.5rem;line-height:1;margin-bottom:10px;filter:drop-shadow(0 0 28px currentColor);}
+.badge-anim-level{font-family:var(--fh);font-size:.72rem;font-weight:800;letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;opacity:.85;}
+.badge-anim-name{font-family:var(--fh);font-size:1.6rem;font-weight:800;color:#fff;text-align:center;letter-spacing:1px;text-shadow:0 0 30px rgba(255,255,255,.3);}
+.badge-anim-desc{font-size:.8rem;font-weight:500;color:rgba(255,255,255,.45);margin-top:6px;letter-spacing:.5px;}top:78px;right:24px;background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:12px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:3000;opacity:0;pointer-events:none;transform:translateX(20px);transition:opacity .35s,transform .35s cubic-bezier(.34,1.56,.64,1);max-width:260px;}
 #badgeNotif.show{opacity:1;pointer-events:all;transform:translateX(0);}
 .bn-icon{font-size:1.8rem;flex-shrink:0;}
 .bn-txt{display:flex;flex-direction:column;gap:2px;}
@@ -325,6 +340,7 @@ select option{background:var(--s2);}
 </style>
 </head>
 <body>
+<div id="badgeAnim" role="status" aria-live="polite"></div>
 <div id="bravo" role="status" aria-live="polite"><div class="bravo-word">BRAVO</div><div class="bravo-sub">Objectif accompli</div></div>
 <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="false"></div>
 <div class="dialog-overlay" id="dialogOverlay" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
@@ -550,7 +566,34 @@ function spark(canvas,sc,color){const ctx=canvas.getContext('2d');if(!ctx)return
 let badgeYear=new Date().getFullYear();
 function chkBadges(){const y=new Date().getFullYear();const ex=new Set(S.badges.map(b=>b.id));const nw=[];BADGE_CATS.forEach(cat=>cat.tiers.forEach(tier=>{const id=`${cat.id}_${tier.level}_${y}`;if(!ex.has(id)&&tier.chk(S,y))nw.push({id,catId:cat.id,level:tier.level,catName:cat.name,icon:cat.icon,desc:tier.desc,year:y,at:new Date().toISOString()});}));nw.forEach(b=>{S.badges.push(b);badgeNotif(b);});if(nw.length){save();updBadges();}}
 function updBadges(){const yr=badgeYear;const unlocked=new Set(S.badges.map(b=>b.id));const years=[...new Set([new Date().getFullYear(),...S.badges.map(b=>b.year)])].sort((a,b)=>b-a);const yrSel=years.length>1?`<div class="badge-yr-sel">${years.map(y=>`<button class="yr-btn${y===yr?' active':''}" data-yr="${y}" type="button">${y}</button>`).join('')}</div>`:'';const cats=BADGE_CATS.map(cat=>{const tiers=cat.tiers.map(tier=>{const id=`${cat.id}_${tier.level}_${yr}`;const ok=unlocked.has(id);return`<div class="tier-card tier-${tier.level}${ok?'':' locked'}"><span class="tier-ico">${cat.icon}</span><span class="tier-lv">${tier.label}</span><span class="tier-tgt">${tier.desc}</span>${ok?`<span class="tier-yr">${yr}</span>`:''}</div>`;}).join('');return`<div class="badge-cat"><div class="badge-cat-hdr"><span class="badge-cat-icon">${cat.icon}</span><span class="badge-cat-name">${cat.name}</span></div><div class="tier-grid">${tiers}</div></div>`;}).join('');document.getElementById('badgesGrid').innerHTML=yrSel+cats;document.querySelectorAll('.yr-btn').forEach(b=>b.addEventListener('click',()=>{badgeYear=+b.dataset.yr;updBadges();}));const total=S.badges.filter(b=>b.year===new Date().getFullYear()).length;document.getElementById('badgeCount').textContent=total||0;}
-function badgeNotif(b){const el=document.getElementById('badgeNotif');const colors={bronze:'#cd7f32',argent:'#a0aec0',or:'#fbbf24',platine:'#e2e8f0'};el.innerHTML=`<span class="bn-icon">${b.icon}</span><div class="bn-txt"><strong style="color:${colors[b.level]||'var(--a)'}">${b.level.charAt(0).toUpperCase()+b.level.slice(1)} ${b.year}</strong><span>${b.catName} – ${b.desc}</span></div>`;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),4000);}
+const LEVEL_STYLES={
+  bronze:{color:'#cd7f32',glow:'rgba(205,127,50,.7)',label:'Bronze'},
+  argent:{color:'#c0c8d8',glow:'rgba(192,200,216,.6)',label:'Argent'},
+  or:    {color:'#fbbf24',glow:'rgba(251,191,36,.7)', label:'Or'},
+  platine:{color:'#e8f0ff',glow:'rgba(220,230,255,.6)',label:'Platine'},
+};
+let badgeAnimQueue=[],badgeAnimRunning=false;
+function badgeNotif(b){badgeAnimQueue.push(b);if(!badgeAnimRunning)runNextBadgeAnim();}
+function runNextBadgeAnim(){
+  if(!badgeAnimQueue.length){badgeAnimRunning=false;return;}
+  badgeAnimRunning=true;
+  const b=badgeAnimQueue.shift();
+  const st=LEVEL_STYLES[b.level]||{color:'#fbbf24',glow:'rgba(251,191,36,.7)',label:b.level||''};
+  const el=document.getElementById('badgeAnim');
+  el.innerHTML=`
+    <div class="badge-anim-glow" style="background:${st.glow}"></div>
+    <div class="badge-anim-icon" style="color:${st.color}">${b.icon}</div>
+    <div class="badge-anim-level" style="color:${st.color}">${st.label} · ${b.year}</div>
+    <div class="badge-anim-name">${b.catName||b.label}</div>
+    <div class="badge-anim-desc">${b.desc||''}</div>`;
+  el.classList.remove('show');void el.offsetWidth;
+  el.classList.add('show');
+  // Small confetti burst in badge color
+  if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){
+    setTimeout(()=>confetti({particleCount:60,spread:70,origin:{y:.45},colors:[st.color,'#fff',st.glow]}),150);
+  }
+  setTimeout(()=>{el.classList.remove('show');setTimeout(runNextBadgeAnim,400);},2900);
+}
 
 // ── Celebrate ─────────────────────────────────────────────────────────
 function celebrate(){if(window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;const el=document.getElementById('bravo');el.classList.remove('show');void el.offsetWidth;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1900);confetti({particleCount:80,spread:90,origin:{y:.5},colors:['#7c6af7','#5b9cf6','#34d399','#fbbf24','#fff']});setTimeout(()=>{confetti({particleCount:45,angle:60,spread:55,origin:{x:0,y:.65},colors:['#7c6af7','#fbbf24']});confetti({particleCount:45,angle:120,spread:55,origin:{x:1,y:.65},colors:['#34d399','#5b9cf6']});},200);}
