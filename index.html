@@ -810,7 +810,7 @@ function renderUpcoming(){
   for(let i=0;i<7;i++){
     const d=new Date(now);d.setDate(now.getDate()+i);
     const k=d.toISOString().slice(0,10),isToday=i===0;
-    const tasks=tasksForDate(d),calEvs=calEventsForDate(d);
+    const tasks=tasksForDate(d).filter(t=>t.scope!=='month'&&t.scope!=='year'),calEvs=calEventsForDate(d);
     const dateLabel=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
     const dow=isToday?"Aujourd'hui":DAYS[d.getDay()];
     const items=[
